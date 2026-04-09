@@ -16,15 +16,19 @@ function Invoke-AdvApiLookupPrivilegeName
     `LookupPrivilegeName`, not PowerShell.
 
     .EXAMPLE
-    Invoke-AdvapiLookupPrivilegeName -Luid $luid
+    Invoke-AdvapiLookupPrivilegeName -LuidLowPart $luid.LowPart -LuidHighPart $luid.HighPart
 
     Demonstrates how to call this function.
     #>
     [CmdletBinding()]
     param(
-        # The privilege value whose name to lookup.
+        # The low part of the LUID of the priveilege to lookup.
         [Parameter(Mandatory)]
-        [PureInvoke.WinNT.LUID] $LUID,
+        [UInt32] $LuidLowPart,
+
+        # The high part of the LUID of the privilege to lookup.
+        [Parameter(Mandatory)]
+        [int] $LuidHighPart,
 
         # The computer name on which to lookup the value. This parameter is passed to the `LookupPrivilegeValue`
         # function's `SystemName` parameter, i.e. the lookup on the remote computer is done by `LookupPrivilegeValue`
@@ -38,6 +42,9 @@ function Invoke-AdvApiLookupPrivilegeName
     $sbName = [StringBuilder]::New(1)
     $nameLength = $sbName.Capacity
 
+    $luid = [PureInvoke.WinNT.LUID]::new()
+    $luid.LowPart = $LuidLowPart
+    $luid.HighPart = $LuidHighPart
     $ptrLuid = ConvertTo-IntPtr -LUID $LUID
 
     try

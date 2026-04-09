@@ -25,10 +25,7 @@ function Invoke-AdvApiLsaOpenPolicy
         [PureInvoke_LsaLookup_PolicyAccessRights[]] $DesiredAccess,
 
         # The optional computer name whose LSA policy to open. The default is the local computer.
-        [String] $ComputerName,
-
-        # The value of the `LsaOpenPolicy` method's `ObjectAttribute` parameter.
-        [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES] $ObjectAttribute
+        [String] $ComputerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -40,15 +37,12 @@ function Invoke-AdvApiLsaOpenPolicy
         $lsaSystemName = [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::New($ComputerName)
     }
 
-    if (-not $ObjectAttribute)
-    {
-        $ObjectAttribute = [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES]::New()
-        $ObjectAttribute.Length = 0
-        $ObjectAttribute.RootDirectory = [IntPtr]::Zero
-        $ObjectAttribute.Attributes = 0
-        $ObjectAttribute.SecurityDescriptor = [IntPtr]::Zero
-        $ObjectAttribute.SecurityQualityOfService = [IntPtr]::Zero
-    }
+    $ObjectAttribute = [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES]::New()
+    $ObjectAttribute.Length = 0
+    $ObjectAttribute.RootDirectory = [IntPtr]::Zero
+    $ObjectAttribute.Attributes = 0
+    $ObjectAttribute.SecurityDescriptor = [IntPtr]::Zero
+    $ObjectAttribute.SecurityQualityOfService = [IntPtr]::Zero
 
     $policyHandle = [IntPtr]::Zero
     $accessMask = 0x0

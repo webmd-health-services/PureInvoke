@@ -73,6 +73,8 @@ Describe 'Invoke-AdvApiLookupPrivilegeValue' {
         $Global:Error | Should -BeNullOrEmpty
         $result | Should -Not -BeNullOrEmpty
         $result.LowPart | Should -Not -Be 0
+        $result.LowPart | Should -BeOfType ([UInt32])
         $result.HighPart | Should -Be 0
+        $result.HighPart | Should -BeOfType ([int])
     }
 }

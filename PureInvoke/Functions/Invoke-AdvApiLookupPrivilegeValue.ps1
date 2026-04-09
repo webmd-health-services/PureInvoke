@@ -58,5 +58,8 @@ function Invoke-AdvApiLookupPrivilegeValue
         return
     }
 
-    return $luid
+    return [pscustomobject]@{
+        LowPart = $luid.LowPart
+        HighPart = $luid.HighPart
+    }
 }
