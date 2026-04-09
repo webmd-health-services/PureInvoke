@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace PureInvoke.LsaLookup
+namespace PureInvoke.v3.LsaLookup
 {
 	[StructLayout(LayoutKind.Sequential)]
 	// ReSharper disable once InconsistentNaming

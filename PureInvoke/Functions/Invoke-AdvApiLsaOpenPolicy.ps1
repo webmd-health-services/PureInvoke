@@ -31,13 +31,13 @@ function Invoke-AdvApiLsaOpenPolicy
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    $lsaSystemName = [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::New([Environment]::MachineName)
+    $lsaSystemName = [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING]::New([Environment]::MachineName)
     if ($ComputerName)
     {
-        $lsaSystemName = [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::New($ComputerName)
+        $lsaSystemName = [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING]::New($ComputerName)
     }
 
-    $ObjectAttribute = [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES]::New()
+    $ObjectAttribute = [PureInvoke.v3.LsaLookup.LSA_OBJECT_ATTRIBUTES]::New()
     $ObjectAttribute.Length = 0
     $ObjectAttribute.RootDirectory = [IntPtr]::Zero
     $ObjectAttribute.Attributes = 0
@@ -48,8 +48,8 @@ function Invoke-AdvApiLsaOpenPolicy
     $accessMask = 0x0
     $DesiredAccess | ForEach-Object { $accessMask = $accessMask -bor $_ }
 
-    $ntstatus = [PureInvoke.AdvApi32]::LsaOpenPolicy([ref] $lsaSystemName, [ref] $ObjectAttribute, $accessMask,
-                                                     [ref] $policyHandle)
+    $ntstatus = [PureInvoke.v3.AdvApi32]::LsaOpenPolicy([ref] $lsaSystemName, [ref] $ObjectAttribute, $accessMask,
+                                                        [ref] $policyHandle)
 
     if (-not (Assert-NtStatusSuccess -Status $ntstatus -Message "Invoke-AdvApiLsaOpenPolicy failed"))
     {

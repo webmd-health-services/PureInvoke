@@ -1,5 +1,5 @@
 
-namespace PureInvoke.WinNT
+namespace PureInvoke.v3.WinNT
 {
 	public struct LUID
 	{

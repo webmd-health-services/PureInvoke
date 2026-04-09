@@ -42,7 +42,7 @@ function Invoke-AdvApiLsaEnumerateAccountRights
     try
     {
         [UInt32] $rightsCount = 0
-        $ntstatus = [PureInvoke.AdvApi32]::LsaEnumerateAccountRights($PolicyHandle, $sidPtr, [ref] $rightsPtr,
+        $ntstatus = [PureInvoke.v3.AdvApi32]::LsaEnumerateAccountRights($PolicyHandle, $sidPtr, [ref] $rightsPtr,
                                                                      [ref] $rightsCount)
 
         $win32Err = Invoke-AdvApiLsaNtStatusToWinError -Status $ntstatus
@@ -56,8 +56,8 @@ function Invoke-AdvApiLsaEnumerateAccountRights
             return
         }
 
-        [PureInvoke.LsaLookup.LSA_UNICODE_STRING[]] $lsaPrivs =
-            [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::PtrToLsaUnicodeStrings($rightsPtr, $rightsCount)
+        [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING[]] $lsaPrivs =
+            [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING]::PtrToLsaUnicodeStrings($rightsPtr, $rightsCount)
         foreach ($lsaPriv in $lsaPrivs)
         {
             $lsaPrivLength = $lsaPriv.Length/[Text.UnicodeEncoding]::CharSize

@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace PureInvoke
+namespace PureInvoke.v3
 {
 	public static class NetApi32
 	{

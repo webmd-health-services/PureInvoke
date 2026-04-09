@@ -7,7 +7,7 @@ function ConvertTo-IntPtr
         [SecurityIdentifier] $Sid,
 
         [Parameter(Mandatory, ParameterSetName='LUID')]
-        [PureInvoke.WinNT.LUID] $LUID
+        [PureInvoke.v3.WinNT.LUID] $LUID
     )
 
     Set-StrictMode -Version 'Latest'

@@ -1,4 +1,4 @@
-﻿namespace PureInvoke.WinNT
+﻿namespace PureInvoke.v3.WinNT
 {
 	public enum SidNameUse
 	{

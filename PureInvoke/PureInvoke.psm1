@@ -25,9 +25,7 @@ Set-StrictMode -Version 'Latest'
 # module in development has its functions in the Functions directory.
 $script:moduleRoot = $PSScriptRoot
 
-# We add the assembly ourselves instead of in the .psd1 file so that this module can be nested and imported from its
-# .psm1, which creates one fewer nested scope levels.
-Add-Type -Path (Join-Path -Path $script:moduleRoot -ChildPath 'bin\PureInvoke.dll' -Resolve)
+Add-Type -Path (Join-Path -Path $script:moduleRoot -ChildPath 'bin\netstandard2.0\PureInvoke.v3.dll' -Resolve)
 
 # Constants
 [IntPtr] $script:invalidHandle = -1

@@ -1,9 +1,9 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PureInvoke.WinNT;
+using PureInvoke.v3.WinNT;
 
-namespace PureInvoke.Lmaccess
+namespace PureInvoke.v3.Lmaccess
 {
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 	public struct LOCALGROUP_MEMBERS_INFO_0

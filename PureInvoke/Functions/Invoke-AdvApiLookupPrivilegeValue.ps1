@@ -49,8 +49,8 @@ function Invoke-AdvApiLookupPrivilegeValue
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    [PureInvoke.WinNT.LUID] $luid = [PureInvoke.WinNT.LUID]::New()
-    $result = [PureInvoke.AdvApi32]::LookupPrivilegeValue($ComputerName, $Name, [ref] $luid)
+    [PureInvoke.v3.WinNT.LUID] $luid = [PureInvoke.v3.WinNT.LUID]::New()
+    $result = [PureInvoke.v3.AdvApi32]::LookupPrivilegeValue($ComputerName, $Name, [ref] $luid)
     $errCode = [Marshal]::GetLastWin32Error()
 
     if (-not $result -and -not (Assert-Win32Error -ErrorCode $errCode))
@@ -58,5 +58,6 @@ function Invoke-AdvApiLookupPrivilegeValue
         return
     }
 
+    # TODO: return [pscustomobject] instead.
     return $luid
 }

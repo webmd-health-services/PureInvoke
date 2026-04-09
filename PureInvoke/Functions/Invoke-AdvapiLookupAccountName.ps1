@@ -40,9 +40,9 @@ function Invoke-AdvApiLookupAccountName
     [StringBuilder] $sbDomainName = [StringBuilder]::New()
     # cch = count of chars
     [UInt32] $cchDomainName = $sbDomainName.Capacity;
-    [PureInvoke.WinNT.SidNameUse] $sidNameUse = [PureInvoke.WinNT.SidNameUse]::Unknown;
+    [PureInvoke.v3.WinNT.SidNameUse] $sidNameUse = [PureInvoke.v3.WinNT.SidNameUse]::Unknown;
 
-    $result = [PureInvoke.AdvApi32]::LookupAccountName($ComputerName, $AccountName, $sid, [ref] $cbSid, $sbDomainName,
+    $result = [PureInvoke.v3.AdvApi32]::LookupAccountName($ComputerName, $AccountName, $sid, [ref] $cbSid, $sbDomainName,
                                                        [ref] $cchDomainName, [ref]$sidNameUse)
     $errCode = [Marshal]::GetLastWin32Error()
 
@@ -53,7 +53,7 @@ function Invoke-AdvApiLookupAccountName
         {
             $sid = [byte[]]::New($cbSid);
             [void]$sbDomainName.EnsureCapacity([int]$cchDomainName);
-            $result = [PureInvoke.AdvApi32]::LookupAccountName($ComputerName, $AccountName, $sid, [ref] $cbSid,
+            $result = [PureInvoke.v3.AdvApi32]::LookupAccountName($ComputerName, $AccountName, $sid, [ref] $cbSid,
                                                                $sbDomainName, [ref] $cchDomainName, [ref] $sidNameUse)
             $errCode = [Marshal]::GetLastWin32Error()
         }

@@ -25,6 +25,6 @@ function Invoke-AdvApiLsaFreeMemory
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    $ntstatus = [PureInvoke.AdvApi32]::LsaFreeMemory($Handle)
+    $ntstatus = [PureInvoke.v3.AdvApi32]::LsaFreeMemory($Handle)
     Assert-NTStatusSuccess -Status $ntstatus -Message 'Invoke-AdvApiLsaFreeMemory failed'
 }

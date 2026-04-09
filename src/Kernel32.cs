@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PureInvoke
+namespace PureInvoke.v3
 {
 	public static class Kernel32
 	{
@@ -20,5 +20,8 @@ namespace PureInvoke
 
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr LocalFree(IntPtr hMem);
+
+		[DllImport("kernel32.dll", SetLastError=true)]
+		public static extern uint FormatMessage(uint dwFlags, IntPtr lpSource, int dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint nSize, IntPtr Arguments);
 	}
 }
