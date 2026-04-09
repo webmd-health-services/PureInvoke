@@ -1,10 +1,10 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using PureInvoke.LsaLookup;
-using PureInvoke.WinNT;
+using PureInvoke.v3.LsaLookup;
+using PureInvoke.v3.WinNT;
 
-namespace PureInvoke
+namespace PureInvoke.v3
 {
 	public static class AdvApi32
 	{
@@ -77,5 +77,6 @@ namespace PureInvoke
 			bool AllRights,
 			LSA_UNICODE_STRING[] UserRights,
 			uint CountOfRights);
+
 	}
 }

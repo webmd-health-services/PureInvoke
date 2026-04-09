@@ -52,22 +52,22 @@ function Invoke-NetApiNetLocalGroupGetMembers
         {
             0
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_0]::New()
+                return [PureInvoke.v3.Lmaccess.LOCALGROUP_MEMBERS_INFO_0]::New()
             }
 
             1
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_1]::New()
+                return [PureInvoke.v3.Lmaccess.LOCALGROUP_MEMBERS_INFO_1]::New()
             }
 
             2
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_2]::New()
+                return [PureInvoke.v3.Lmaccess.LOCALGROUP_MEMBERS_INFO_2]::New()
             }
 
             3
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_3]::New()
+                return [PureInvoke.v3.Lmaccess.LOCALGROUP_MEMBERS_INFO_3]::New()
             }
         }
     }
@@ -79,7 +79,7 @@ function Invoke-NetApiNetLocalGroupGetMembers
 
     do
     {
-        $status = [PureInvoke.NetApi32]::NetLocalGroupGetMembers($ComputerName,
+        $status = [PureInvoke.v3.NetApi32]::NetLocalGroupGetMembers($ComputerName,
                                                                  $LocalGroupName,
                                                                  $Level,
                                                                  [ref] $buffer,
@@ -104,7 +104,7 @@ function Invoke-NetApiNetLocalGroupGetMembers
                     Write-Output
                 $itemAddr = [IntPtr]::New($itemAddr.ToInt64() + [Int64][Marshal]::SizeOf($member))
             }
-            $status = [PureInvoke.NetApi32]::NetApiBufferFree($buffer)
+            $status = [PureInvoke.v3.NetApi32]::NetApiBufferFree($buffer)
             Assert-Win32Error -ErrorCode $status | Out-Null
         }
     }

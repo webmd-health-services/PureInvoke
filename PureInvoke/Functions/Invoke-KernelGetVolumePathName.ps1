@@ -26,7 +26,7 @@ function Invoke-KernelGetVolumePathName
 
     $sbPath = [StringBuilder]::New($script:maxPath)
     $cchPath = [UInt32]$sbPath.Capacity # in/out character-count variable for the WinAPI calls.
-    $result = [PureInvoke.Kernel32]::GetVolumePathName($Path, $sbPath, $cchPath)
+    $result = [PureInvoke.v3.Kernel32]::GetVolumePathName($Path, $sbPath, $cchPath)
     $errCode = [Marshal]::GetLastWin32Error()
     $msg = "[Kernel32]::GetVolumePathName(""${Path}"", [out] ""${sbPath}"", ${cchPath})  return ${result}  " +
            "GetLastError() ${errCode}"
