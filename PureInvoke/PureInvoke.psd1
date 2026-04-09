@@ -18,7 +18,7 @@
     RootModule = 'PureInvoke.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.0.2'
+    ModuleVersion = '2.0.0'
 
     # ID used to uniquely identify this module
     GUID = '3b4a73f4-c870-44fc-82b9-9a74dd0c647f'

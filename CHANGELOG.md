@@ -1,7 +1,28 @@
 
 # PureInvoke PowerShell Module Changelog
 
+## 2.0.0
+
+### Upgrade Instructions
+
+* Replaces usages of `Invoke-AdvApiLookupPrivilegeName` function's `LUID` parameter with the new `LuidLowPart` and
+  `LuidHighPart` parameters.
+* Remove usages of the `Invoke-AdvApiLsaOpenPolicy` function's `ObjectAttribute` parameter. Its not used by the
+  `LsaOpenPolicy` function.
+
+### Added
+
+`LuidLowPart` and `LuidHighPart` parameters to the `Invoke-AdvApiLookupPrivilegeName` function.
+
+### Removed
+
+* The `Invoke-AdvApiLookupPrivilegeName` function's `LUID` parameter. Use the new `LuidLowPart` and `LuidHighPart`
+  parameters.
+* The `Invoke-AdvApiLsaOpenPolicy` function's `ObjectAttribute` parameter.
+
 ## 1.0.2
+
+> Released 10 Dec 2024
 
 Allow importing of .psm1 file so users can keep nested scopes to a minimum when importing PureInvoke as a nested module.
 
