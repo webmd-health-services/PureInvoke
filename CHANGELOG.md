@@ -9,6 +9,7 @@
   `LuidHighPart` parameters.
 * Remove usages of the `Invoke-AdvApiLsaOpenPolicy` function's `ObjectAttribute` parameter. Its not used by the
   `LsaOpenPolicy` function.
+* Minimum .NET version is now 4.6.
 
 ### Added
 
