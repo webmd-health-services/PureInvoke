@@ -23,5 +23,5 @@ function Invoke-AdvApiLsaNtStatusToWinError
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    return [PureInvoke.v3.AdvApi32]::LsaNtStatusToWinError($Status)
+    return (Get-AdvApi32)::LsaNtStatusToWinError($Status)
 }

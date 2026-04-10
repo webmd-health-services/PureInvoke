@@ -39,11 +39,11 @@ function Invoke-AdvApiLsaEnumerateAccountRights
 
     [IntPtr] $rightsPtr = [IntPtr]::Zero
 
+    $advApi32 = Get-AdvApi32
     try
     {
         [UInt32] $rightsCount = 0
-        $ntstatus = [PureInvoke.v3.AdvApi32]::LsaEnumerateAccountRights($PolicyHandle, $sidPtr, [ref] $rightsPtr,
-                                                                     [ref] $rightsCount)
+        $ntstatus = $advApi32::LsaEnumerateAccountRights($PolicyHandle, $sidPtr, [ref] $rightsPtr, [ref] $rightsCount)
 
         $win32Err = Invoke-AdvApiLsaNtStatusToWinError -Status $ntstatus
         if ($win32Err -eq [PureInvoke_ErrorCode]::FileNotFound)
@@ -56,8 +56,8 @@ function Invoke-AdvApiLsaEnumerateAccountRights
             return
         }
 
-        [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING[]] $lsaPrivs =
-            [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING]::PtrToLsaUnicodeStrings($rightsPtr, $rightsCount)
+        $lsaUnicodeString = $advApi32 | Get-PInvokeStructType -Name 'LsaUnicodeString'
+        $lsaPrivs = $lsaUnicodeString::PtrToLsaUnicodeStrings($rightsPtr, $rightsCount)
         foreach ($lsaPriv in $lsaPrivs)
         {
             $lsaPrivLength = $lsaPriv.Length/[Text.UnicodeEncoding]::CharSize

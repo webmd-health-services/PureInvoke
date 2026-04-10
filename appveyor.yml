@@ -12,78 +12,48 @@ test: false
 environment:
   WHISKEY_DISABLE_ERROR_FORMAT: True
   matrix:
-  - job_name: Build
-    job_group: build
-    appveyor_build_worker_image: Visual Studio 2022
-
   # Windows
   # https://www.appveyor.com/docs/windows-images-software/
   - job_name: Windows PowerShell 5.1 on Windows Server 2016
     job_group: ps
     appveyor_build_worker_image: Visual Studio 2017
-    job_depends_on: Build
 
   - job_name: Windows PowerShell 5.1 on Windows Server 2019
     job_group: ps
     appveyor_build_worker_image: Visual Studio 2022
-    job_depends_on: Build
 
   # PowerShell 7 on Windows only available on Windows Server 2019 build image
   - job_name: PowerShell 7 on Windows Server 2019
     job_group: pwsh
     appveyor_build_worker_image: Visual Studio 2022
-    job_depends_on: Build
 
   # PowerShell 6 on Windows only available on Windows Server 2016 build image
   - job_name: PowerShell 6 on Windows Server 2016
     job_group: pwsh
     appveyor_build_worker_image: Visual Studio 2017
-    job_depends_on: Build
-
-
 
 artifacts:
 - path: .output\*
 
-
 for:
-- matrix:
-    only:
-    - job_group: build
-  build_script:
-  - ps: |
-        $ProgressPreference = 'SilentlyContinue'
-        iwr https://raw.githubusercontent.com/webmd-health-services/Prism/main/Scripts/init.ps1 | iex | Format-Table
-        .\build.ps1
-
 # Build in Windows PowerShell
 - matrix:
     only:
     - job_group: ps
   build_script:
-  - ps: |
+  - ps: &build_script |
         $ProgressPreference = 'SilentlyContinue'
         iwr https://raw.githubusercontent.com/webmd-health-services/Prism/main/Scripts/init.ps1 | iex | Format-Table
-        .\Get-PureInvokeZipArtifact.ps1 -Token $env:APPVEYOR_BEARER_TOKEN -JobName 'Build'
         if ($env:ENABLE_RDP -eq 'True')
         {
           $nonat = $false
           $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
         }
-        .\build.ps1 -PipelineName 'Tests'
+        .\build.ps1
 
 # Build in PowerShell
 - matrix:
     only:
     - job_group: pwsh
   build_script:
-  - pwsh: |
-        $ProgressPreference = 'SilentlyContinue'
-        iwr https://raw.githubusercontent.com/webmd-health-services/Prism/main/Scripts/init.ps1 | iex | Format-Table
-        .\Get-PureInvokeZipArtifact.ps1 -Token $env:APPVEYOR_BEARER_TOKEN -JobName 'Build'
-        if ($env:ENABLE_RDP -eq 'True')
-        {
-          $nonat = $false
-          $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-        }
-        .\build.ps1 -PipelineName 'Tests'
+  - pwsh: *build_script

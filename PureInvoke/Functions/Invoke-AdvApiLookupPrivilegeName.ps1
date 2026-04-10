@@ -42,14 +42,16 @@ function Invoke-AdvApiLookupPrivilegeName
     $sbName = [StringBuilder]::New(1)
     $nameLength = $sbName.Capacity
 
-    $luid = [PureInvoke.v3.WinNT.LUID]::new()
+
+    $advApi32 = Get-AdvApi32
+    $luid = $advApi32 | New-PInvokeStruct -Name 'Luid'
     $luid.LowPart = $LuidLowPart
     $luid.HighPart = $LuidHighPart
     $ptrLuid = ConvertTo-IntPtr -LUID $LUID
 
     try
     {
-        $result = [PureInvoke.v3.AdvApi32]::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
+        $result = $advApi32::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
         $errCode = [Marshal]::GetLastWin32Error()
 
         if (-not $result)
@@ -57,7 +59,7 @@ function Invoke-AdvApiLookupPrivilegeName
             if ($errCode -eq [PureInvoke_ErrorCode]::InsufficientBuffer)
             {
                 [void]$sbName.EnsureCapacity($nameLength)
-                $result = [PureInvoke.v3.AdvApi32]::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
+                $result = $advApi32::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
                 $errCode = [Marshal]::GetLastWin32Error()
             }
 

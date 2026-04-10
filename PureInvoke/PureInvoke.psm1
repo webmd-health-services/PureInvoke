@@ -20,17 +20,94 @@ using namespace System.Text
 #Requires -Version 5.1
 Set-StrictMode -Version 'Latest'
 
+if (-not (Test-Path -Path 'variable:IsWindows'))
+{
+    $script:IsWindows = $true
+    $script:IsLinux = $script:IsMacOS = $false
+}
+
 # Functions should use $script:moduleRoot as the relative root from which to find
 # things. A published module has its function appended to this file, while a
 # module in development has its functions in the Functions directory.
 $script:moduleRoot = $PSScriptRoot
 
-Add-Type -Path (Join-Path -Path $script:moduleRoot -ChildPath 'bin\netstandard2.0\PureInvoke.v3.dll' -Resolve)
+$script:namespace = "PureInvoke"
+
+[int]$script:maxCompiliationAttempts = 5
+if ((Test-Path -Path 'env:PUREINVOKE_MAX_COMPILATION_ATTEMPTS'))
+{
+    [int]$envMaxCompilationAttempts = $script:maxCompiliationAttempts
+    if (-not [int]::TryParse($env:PUREINVOKE_MAX_COMPILATION_ATTEMPTS, [ref] $envMaxCompilationAttempts))
+    {
+        $msg = "Ignoring PUREINVOKE_MAX_COMPILATION_ATTEMPTS value ""${env:PUREINVOKE_MAX_COMPILATION_ATTEMPTS}"" " +
+               'because it is not an integer.'
+        Write-Warning -Message $msg
+    }
+    elseif ($envMaxCompilationAttempts -lt 0)
+    {
+        $msg = "Ignoring PUREINVOKE_MAX_COMPILATION_ATTEMPTS value ""${env:PUREINVOKE_MAX_COMPILATION_ATTEMPTS}"" " +
+               'because it is less than 0.'
+        Write-Warning -Message $msg
+    }
+    else
+    {
+        $script:maxCompiliationAttempts = $envMaxCompilationAttempts
+    }
+}
+
+[int]$script:waitMsBetweenFailures = 100
+if ((Test-Path -Path 'env:PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES'))
+{
+    [int]$envWaitMsBetweenFailures = $script:waitMsBetweenFailures
+    if (-not [int]::TryParse($env:PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES, [ref] $envWaitMsBetweenFailures))
+    {
+        $msg = "Ignoring PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES value " +
+               """${env:PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES}"" because it is not an integer."
+        Write-Warning -Message $msg
+    }
+    elseif ($envWaitMsBetweenFailures -lt 0)
+    {
+        $msg = "Ignoring PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES value " +
+               """${env:PUREINVOKE_WAIT_MS_BETWEEN_COMPILATION_FAILURES}"" because it is less than 0."
+        Write-Warning -Message $msg
+    }
+    else
+    {
+        $script:waitMsBetweenFailures = $envWaitMsBetweenFailures
+    }
+}
+
+# If `$script:tmpPath` is set, `Add-PInvokeType` changes the temp path environment variable to `$script:tmpPath` before
+# using `Add-Type` to compile its types. By default, uses Add-Type's default behavior, which is to use the value of the
+# temp path environment variable for the current platform (`TMP` on Windows, `TMPDIR` on Linux/macOS).
+[string] $script:tmpPath = $null
+if ((Test-Path -Path 'env:PUREINVOKE_TMP_PATH') -and $env:PUREINVOKE_TMP_PATH)
+{
+    $script:tmpPath = $env:PUREINVOKE_TMP_PATH
+    if (-not [IO.Path]::IsPathRooted($script:tmpPath))
+    {
+        Write-Warning "Ignoring PUREINVOKE_TMP_PATH value ""${script:tmpPath}"" because it is a relative path. "
+        $script:tmpPath = $null
+    }
+
+    if ((Test-Path -Path $script:tmpPath -PathType Leaf))
+    {
+        Write-Warning "Ignoring PUREINVOKE_TMP_PATH value ""${script:tmpPath}"" because it is a file."
+    }
+}
+
+# The name of the environmen variable that Add-Type uses when writing files.
+$script:tmpPathEnvVarName = 'TMPDIR'
+if ($IsWindows)
+{
+    $script:tmpPathEnvVarName = 'TMP'
+}
 
 # Constants
 [IntPtr] $script:invalidHandle = -1
 $script:maxPath = 65535
 
+# https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes
 enum PureInvoke_ErrorCode
 {
     Ok                       = 0x000
@@ -59,6 +136,7 @@ enum PureInvoke_ErrorCode
     NERR_InvalidComputer     = 0x92f    # 2351
 }
 
+# https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lsad/b61b7268-987a-420b-84f9-6c75f8dc8558
 [Flags()]
 enum PureInvoke_LsaLookup_PolicyAccessRights
 {
@@ -75,6 +153,22 @@ enum PureInvoke_LsaLookup_PolicyAccessRights
     ServerAdmin = 0x400
     LookupNames = 0x800
     Notification = 0x1000
+}
+
+# https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-sid_name_use
+enum PureInvoke_SidNameUse
+{
+    User = 1
+    Group = 2
+    Domain = 3
+    Alias = 4
+    WellKnownGroup = 5
+    DeletedAccount = 6
+    Invalid = 7
+    Unknown = 8
+    Computer = 9
+    Label = 10
+    LogonSession = 11
 }
 
 # Store each of your module's functions in its own file in the Functions
