@@ -15,6 +15,16 @@
 
 `LuidLowPart` and `LuidHighPart` parameters to the `Invoke-AdvApiLookupPrivilegeName` function.
 
+### Changed
+
+PureInvoke now uses `Add-Type` to compile its P/Invoke C# code at runtime instead of using a pre-compiled assembly.
+Internally, uses dynamic type names to prevent type collisions if different versions of PureInvoke are loaded. Types are
+only compiled when needed.
+
+### Fixed
+
+PureInvoke can fail to import if a version of PureInvoke is loaded that has a different pre-compiled assembly.
+
 ### Removed
 
 * The `Invoke-AdvApiLookupPrivilegeName` function's `LUID` parameter. Use the new `LuidLowPart` and `LuidHighPart`

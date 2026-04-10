@@ -15,9 +15,6 @@ Build:
 - Exec: appveyor UpdateBuild -Version "$(WHISKEY_SEMVER2)+$(WHISKEY_BUILD_NUMBER)"
   .OnlyBy: BuildServer
 
-- MSBuild:
-    Path: src\PureInvoke.sln
-
 # Dot-sourcing files is expensive. Move all functions into .psm1 file to improve import speed. Do this before testing
 # to ensure the module still works.
 - MergeFile:
@@ -61,10 +58,6 @@ Build:
 - Exec: appveyor PushArtifact "$(WHISKEY_OUTPUT_DIRECTORY)/PureInvoke.$(WHISKEY_SEMVER2_NO_BUILD_METADATA).nupkg" -DeploymentName 'PowerShellGallery'
   .OnlyBy: BuildServer
 
-Tests:
-- PowerShell:
-    .ExceptDuring: Clean
-    ScriptBlock: prism install | Format-Table -Auto
 - Pester:
     Configuration:
         Run:

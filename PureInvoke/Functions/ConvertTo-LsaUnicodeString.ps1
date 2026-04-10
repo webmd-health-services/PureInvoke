@@ -7,11 +7,19 @@ function ConvertTo-LsaUnicodeString
         [String] $InputObject
     )
 
+    begin
+    {
+        Set-StrictMode -Version 'Latest'
+        Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
+
+        $advApi32 = Get-AdvApi32
+    }
+
     process
     {
         Set-StrictMode -Version 'Latest'
         Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-        [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING]::New($InputObject) | Write-Output
+        New-PInvokeStruct -InputObject $advApi32 -Name 'LsaUnicodeString' -ArgumentList ($InputObject) | Write-Output
     }
 }

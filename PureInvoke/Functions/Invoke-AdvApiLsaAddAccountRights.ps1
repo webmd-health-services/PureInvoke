@@ -39,11 +39,12 @@ function Invoke-AdvApiLsaAddAccountRights
 
     $sidPtr = ConvertTo-IntPtr -Sid $Sid
 
-    [PureInvoke.v3.LsaLookup.LSA_UNICODE_STRING[]] $lsaPrivs = $Privilege | ConvertTo-LsaUnicodeString
+    [Object[]]$lsaPrivs = $Privilege | ConvertTo-LsaUnicodeString
 
+    $advApi32 = Get-AdvApi32
     try
     {
-        $ntstatus = [PureInvoke.v3.AdvApi32]::LsaAddAccountRights($PolicyHandle, $sidPtr, $lsaPrivs, $lsaPrivs.Length)
+        $ntstatus = $advApi32::LsaAddAccountRights($PolicyHandle, $sidPtr, $lsaPrivs, $lsaPrivs.Length)
 
         Assert-NTStatusSuccess -Status $ntstatus -Message 'LsaAddAccountRights failed'
     }
