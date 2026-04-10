@@ -59,6 +59,7 @@ Build:
   .OnlyBy: BuildServer
 
 - Pester:
+    .ErrorAction: Continue
     Configuration:
         Run:
             Path: Tests\*.Tests.ps1

@@ -76,6 +76,7 @@
 
     # Functions to export from this module. Only list public function here.
     FunctionsToExport = @(
+        'Invoke-AdvApiCloseServiceHandle'
         'Invoke-AdvApiLookupAccountName',
         'Invoke-AdvApiLookupAccountSid',
         'Invoke-AdvApiLookupPrivilegeName',
@@ -87,9 +88,14 @@
         'Invoke-AdvApiLsaNtStatusToWinError',
         'Invoke-AdvApiLsaOpenPolicy',
         'Invoke-AdvApiLsaRemoveAccountRights',
+        'Invoke-AdvApiOpenSCManager',
+        'Invoke-AdvApiOpenService',
+        'Invoke-AdvApiQueryServiceConfig',
+        'Invoke-AdvApiQueryServiceConfig2',
         'Invoke-KernelFindFileName',
         'Invoke-KernelGetVolumePathName',
-        'Invoke-NetApiNetLocalGroupGetMembers'
+        'Invoke-NetApiNetLocalGroupGetMembers',
+        'Test-PInvokeHandle'
     )
 
     # Cmdlets to export from this module. By default, you get a script module, so there are no cmdlets.

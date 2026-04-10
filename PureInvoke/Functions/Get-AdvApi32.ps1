@@ -130,6 +130,150 @@ function Get-AdvApi32
             bool AllRights,
             LsaUnicodeString[] userRights,
             uint countOfRights);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr OpenSCManager(String lpMachineName, String lpDatabaseName, UInt32 dwDesiredAccess);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseServiceHandle(IntPtr hSCObject);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr OpenService(IntPtr hSCManager, String lpServiceName, UInt32 dwDesiredAccess);
+
+        [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+        public static extern Boolean QueryServiceConfig(IntPtr hService, IntPtr lpServiceConfig, uint cbBufSize,
+            out uint pcbBytesNeeded);
+
+        [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+        public static extern bool QueryServiceConfig2(IntPtr hService, uint dwInfoLevel, IntPtr lpBuffer,
+            uint cbBufSize, out uint pcbBytesNeeded);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public class ServiceConfig
+		{
+			public uint ServiceType;
+
+			public uint StartType;
+
+			public uint ErrorControl;
+
+			[MarshalAs(UnmanagedType.LPWStr)]
+			public string BinaryPathName;
+
+			[MarshalAs(UnmanagedType.LPWStr)]
+			public string LoadOrderGroup;
+
+			public uint TagID;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+			public string Dependencies;
+
+			[MarshalAs(UnmanagedType.LPWStr)]
+			public string ServiceStartName;
+
+			[MarshalAs(UnmanagedType.LPWStr)]
+			public string DisplayName;
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigDelayedAutoStart
+        {
+            public bool DelayedAutoStart;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigDescription
+        {
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string Description;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigFailureActions
+        {
+            public uint ResetPeriod;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string RebootMsg;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string Command;
+
+            public uint ActionsCount;
+
+            public IntPtr Actions;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigFailureAction
+        {
+            public uint Type;
+            public uint Delay;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigFailureActionsFlag
+        {
+            public bool FailureActionsOnNonCrashFailures;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigPreferredNode
+        {
+            public short PreferredNode;
+            public bool Delete;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigPreshutdown
+        {
+            public uint PreshutdownTimeout;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigRequiredPrivileges
+        {
+            public IntPtr RequiredPrivileges;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigSid
+        {
+            public uint SidType;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigTriggers
+        {
+            public uint TriggersCount;
+            public IntPtr Triggers;
+            public byte Reserved;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigTrigger
+        {
+            public uint Type;
+            public uint Action;
+            public IntPtr Subtype;
+            public uint DataItemsCount;
+            public IntPtr DataItems;
+        }
+
+		[StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigTriggerSpecificDataItem
+        {
+            public uint Type;
+            public uint Size;
+            public IntPtr Data;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class ServiceConfigLaunchProtected
+        {
+            public uint LaunchProtected;
+        }
 "@
 
     return Add-PInvokeType -DllName 'AdvApi32' -Definition $advApi

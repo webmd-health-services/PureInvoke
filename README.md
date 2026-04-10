@@ -59,6 +59,16 @@ Import-Module -Name '.\PureInvoke'
 | [`LsaOpenPolicy`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaopenpolicy) | `Invoke-AdvApiLsaOpenPolicy` |
 | [`LsaRemoveAccountRights`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaremoveaccountrights) | `Invoke-AdvApiLsaRemoveAccountRights` |
 
+#### Windows Services (winsvc.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`OpenSCManagerW`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagerw) | `Invoke-AdvApiOpenSCManager` |
+| [`CloseServiceHandle`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-closeservicehandle) | `Invoke-AdvApiCloseServiceHandle` |
+| [`OpenServiceW`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openservicew) | `Invoke-AdvApiOpenService` |
+| [`QueryServiceConfigW`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfigw) | `Invoke-AdvApiQueryServiceConfig` |
+| [`QueryServiceConfig2`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2w) | `Invoke-AdvApiQueryServiceConfig2` |
+
 ### From kernel32.dll
 
 #### File System (fileapi.h)
