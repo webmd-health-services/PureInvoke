@@ -31,4 +31,3 @@ function New-PInvokeStruct
         return $structType::New()
     }
 }
-
