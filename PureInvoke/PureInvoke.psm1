@@ -15,6 +15,7 @@
 using namespace System.ComponentModel
 using namespace System.Runtime.InteropServices
 using namespace System.Security.Principal
+using namespace System.ServiceProcess
 using namespace System.Text
 
 #Requires -Version 5.1
@@ -104,6 +105,8 @@ if ($IsWindows)
 [IntPtr] $script:invalidHandle = -1
 $script:maxPath = 65535
 
+Add-Type -AssemblyName 'System.ServiceProcess'
+
 enum PureInvoke_ErrorCode
 {
     Ok                       = 0x000
@@ -161,6 +164,218 @@ enum PureInvoke_SidNameUse
     Invalid = 7
     Unknown = 8
     Computer = 9
+}
+
+# https://learn.microsoft.com/en-us/windows/win32/secauthz/access-mask
+enum _AccessMask
+{
+    Delete                 = 0x00010000
+    ReadControl            = 0x00020000
+    WriteDac               = 0x00040000
+    WriteOwner             = 0x00080000
+    Synchronize            = 0x00100000
+    StandardRightsRead     = 0x00020000
+    StandardRightsWrite    = 0x00020000
+    StandardRightsExecute  = 0x00020000
+    StandardRightsRequired = 0x000f0000
+    StandardRigtsAll       = 0x001f0000
+    SpecificRightsAll      = 0x0000ffff
+    AccessSystemSecurity   = 0x01000000
+    MaximumAllowed         = 0x02000000
+    GenericAll             = 0x10000000
+    GenericExecute         = 0x20000000
+    GenericWrite           = 0x40000000
+    GenericRead            = 0x80000000
+}
+
+
+# https://learn.microsoft.com/en-us/windows/win32/secauthz/generic-access-rights#generic-access-rights-constants
+
+# PowerShell doesn't let enumerations use values defined in the same enumeration, so create a private enum so we only
+# define each flag once.
+[Flags()]
+enum _ScmAccessRights
+{
+    Connect             = 0x00000001
+    CreateService       = 0x00000002
+    EnumerateService    = 0x00000004
+    Lock                = 0x00000008
+    QueryLockStatus     = 0x00000010
+    ModifyBootConfig    = 0x00000020
+}
+
+# https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights#access-rights-for-the-service-control-manager
+[Flags()]
+enum PureInvoke_SCManagerAccessRights
+{
+    # Specific access rights
+    CreateService       = [_ScmAccessRights]::CreateService
+    Connect             = [_ScmAccessRights]::Connect
+    EnumerateService    = [_ScmAccessRights]::EnumerateService
+    Lock                = [_ScmAccessRights]::Lock
+    ModifyBootConfig    = [_ScmAccessRights]::ModifyBootConfig
+    QueryLockStatus     = [_ScmAccessRights]::QueryLockStatus
+
+    All                 = [_AccessMask]::StandardRightsRequired -bor
+                          [_ScmAccessRights]::Connect -bor
+                          [_ScmAccessRights]::CreateService -bor
+                          [_ScmAccessRights]::EnumerateService -bor
+                          [_ScmAccessRights]::Lock -bor
+                          [_ScmAccessRights]::QueryLockStatus -bor
+                          [_ScmAccessRights]::ModifyBootConfig
+
+    # Generic access rights
+    Read                = [_AccessMask]::StandardRightsRead -bor
+                          [_ScmAccessRights]::EnumerateService -bor
+                          [_ScmAccessRights]::QueryLockStatus
+
+    Write               = [_AccessMask]::StandardRightsWrite -bor
+                          [_ScmAccessRights]::CreateService -bor
+                          [_ScmAccessRights]::ModifyBootConfig
+
+    Execute             = [_AccessMask]::StandardRightsExecute -bor
+                          [_ScmAccessRights]::Connect -bor
+                          [_ScmAccessRights]::Lock
+}
+
+enum _ServiceAccessRights
+{
+    QueryConfig             = 0x00000001
+    ChangeConfig            = 0x00000002
+    QueryStatus             = 0x00000004
+    EnumerateDependents     = 0x00000008
+    Start                   = 0x00000010
+    Stop                    = 0x00000020
+    PauseContinue           = 0x00000040
+    Interrogate             = 0x00000080
+    UserDefinedControl      = 0x00000100
+}
+
+# https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights#access-rights-for-a-service
+[Flags()]
+enum PureInvoke_ServiceAccessRights
+{
+    # Specific access rights.
+    ChangeConfig            = [_ServiceAccessRights]::ChangeConfig
+    EnumerateDependents     = [_ServiceAccessRights]::EnumerateDependents
+    Interrogate             = [_ServiceAccessRights]::Interrogate
+    PauseContinue           = [_ServiceAccessRights]::PauseContinue
+    QueryConfig             = [_ServiceAccessRights]::QueryConfig
+    QueryStatus             = [_ServiceAccessRights]::QueryStatus
+    Start                   = [_ServiceAccessRights]::Start
+    Stop                    = [_ServiceAccessRights]::Stop
+    UserDefinedControl      = [_ServiceAccessRights]::UserDefinedControl
+
+    AllAccess               = [_AccessMask]::StandardRightsRequired -bor
+                              [_ServiceAccessRights]::ChangeConfig -bor
+                              [_ServiceAccessRights]::EnumerateDependents -bor
+                              [_ServiceAccessRights]::Interrogate -bor
+                              [_ServiceAccessRights]::PauseContinue -bor
+                              [_ServiceAccessRights]::QueryConfig -bor
+                              [_ServiceAccessRights]::QueryStatus -bor
+                              [_ServiceAccessRights]::Start -bor
+                              [_ServiceAccessRights]::Stop -bor
+                              [_ServiceAccessRights]::UserDefinedControl
+
+    # Standard access rights.
+    AccessSystemSecurity    = [_AccessMask]::AccessSystemSecurity
+    Delete                  = [_AccessMask]::Delete
+    ReadControl             = [_AccessMask]::ReadControl
+    WriteDac                = [_AccessMask]::WriteDac
+    WriteOwner              = [_AccessMask]::WriteOwner
+
+    # Generic access rights
+    Read                    = [_AccessMask]::StandardRightsRead -bor
+                              [_ServiceAccessRights]::QueryConfig -bor
+                              [_ServiceAccessRights]::QueryStatus -bor
+                              [_ServiceAccessRights]::Interrogate -bor
+                              [_ServiceAccessRights]::EnumerateDependents
+
+    Write                   = [_AccessMask]::StandardRightsWrite -bor
+                              [_ServiceAccessRights]::ChangeConfig
+
+    Execute                 = [_AccessMask]::StandardRightsExecute -bor
+                              [_ServiceAccessRights]::Start -bor
+                              [_ServiceAccessRights]::Stop -bor
+                              [_ServiceAccessRights]::PauseContinue -bor
+                              [_ServiceAccessRights]::UserDefinedControl
+}
+
+[Flags()]
+enum PureInvoke_ServiceErrorControl
+{
+    Ignore = 0
+    Normal = 1
+    Severe = 2
+    Critical = 3
+}
+
+[Flags()]
+enum PureInvoke_ServiceInfoLevel
+{
+    Description        = 0x1
+    FailureActions     = 0x2
+    DelayedAutoStart   = 0x3
+    FailureActionsFlag = 0x4
+    SidType            = 0x5
+    RequiredPrivileges = 0x6
+    Preshutdown        = 0x7
+    Triggers           = 0x8
+    PreferredNode      = 0x9
+    LaunchProtected    = 0xc
+}
+
+enum PureInvoke_ServiceActionType
+{
+    None = 0
+    Restart = 1
+    Reboot = 2
+    RunCommand = 3
+}
+$script:actionTypes = [Collections.Generic.HashSet[UInt32]]::New()
+[Enum]::GetValues([PureInvoke_ServiceActionType]) | ForEach-Object { $script:actionTypes.Add($_) } | Out-Null
+
+enum PureInvoke_ServiceSidType
+{
+    None         = 0x0
+    Unrestricted = 0x1
+    Restricted   = 0x3
+}
+
+enum PureInvoke_ServiceTriggerType
+{
+    DeviceInterfaceArrival =  1
+    IPAddressAvailability  =  2
+    DomainJoin             =  3
+    FirewallPortEvent      =  4
+    GroupPolicy            =  5
+    NetworkEndpoint        =  6
+    Custom                 = 20
+}
+$script:triggerTypes = [Collections.Generic.HashSet[UInt32]]::New()
+[Enum]::GetValues([PureInvoke_ServiceTriggerType]) | ForEach-Object { $script:triggertypes.Add($_) } | Out-Null
+
+enum PureInvoke_ServiceProtectionType
+{
+    None = 0
+    Windows = 1
+    WindowsLight = 2
+    AntimalwareLight = 3
+}
+
+enum PureInvoke_ServiceTriggerAction
+{
+    Start = 0x1
+    Stop  = 0x2
+}
+
+enum PureInvoke_ServiceTriggerDataType
+{
+    Binary = 0x1
+    String = 0x2
+    Level  = 0x3
+    KeywordAny = 0x4
+    KeywordAll = 0x5
 }
 
 # Store each of your module's functions in its own file in the Functions

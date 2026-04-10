@@ -58,7 +58,29 @@ Build:
 - Exec: appveyor PushArtifact "$(WHISKEY_OUTPUT_DIRECTORY)/PureInvoke.$(WHISKEY_SEMVER2_NO_BUILD_METADATA).nupkg" -DeploymentName 'PowerShellGallery'
   .OnlyBy: BuildServer
 
+# - PowerShell: |
+#     Import-Module -Name '.\PureInvoke'
+
+#     $InformationPreference = 'Continue'
+
+#     Write-Information "Multiple Triggers"
+
+#     .\Get-ServiceConfiguration.ps1 -InfoLevel Triggers |
+#         Where-Object { $_.Triggers.Count -gt 1 } |
+#         Format-Table DisplayName,Name,Triggers -Auto
+
+#     Write-Information "Multiple Data Items"
+
+#     .\Get-ServiceConfiguration.ps1 -InfoLevel Triggers |
+#         Where-Object { $_.Triggers | Where-Object { $_.DataItems.Count -gt 1 } } |
+#         ConvertTo-Json -Depth 50
+
+#     .\Get-ServiceConfiguration.ps1 -InfoLevel LaunchProtected |
+#         Where-Object 'LaunchProtected' -NE 'None' |
+#         Format-Table -Auto
+
 - Pester:
+    .ErrorAction: Continue
     Configuration:
         Run:
             Path: Tests\*.Tests.ps1

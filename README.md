@@ -54,6 +54,14 @@ Import-Module -Name '.\PureInvoke'
 * `LsaOpenPolicy`: `Invoke-AdvApiLsaOpenPolicy`
 * `LsaRemoveAccountRights`: `Invoke-AdvApiLsaRemoveAccountRights`
 
+#### Windows Services
+
+* `OpenSCManagerW`: `Invoke-AdvApiOpenSCManager`
+* `CloseServiceHandle`: `Invoke-AdvApiCloseServiceHandle`
+* `OpenService`: `Invoke-AdvApiOpenService`
+* `QueryServiceConfig`: `Invoke-AdvApiQueryServiceConfig`
+* `QueryServiceConfig2`: `Invoke-AdvApiQueryServiceConfig2`
+
 ### From kernel32.dll
 
 #### File System
