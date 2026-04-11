@@ -16,7 +16,7 @@ function Invoke-AdvApiLookupPrivilegeName
     `LookupPrivilegeName`, not PowerShell.
 
     .EXAMPLE
-    Invoke-AdvapiLookupPrivilegeName -LuidLowPart $luid.LowPart -LuidHighPart $luid.HighPart
+    Invoke-AdvApiLookupPrivilegeName -LuidLowPart $luid.LowPart -LuidHighPart $luid.HighPart
 
     Demonstrates how to call this function.
     #>
