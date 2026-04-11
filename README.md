@@ -39,8 +39,13 @@ Import-Module -Name '.\PureInvoke'
 
 ### From advapi32.dll
 
+#### Accounts
+
 * `LookupAccountName`: `Invoke-AdvApiLookupAccountName`
 * `LookupAccountSid`: `Invoke-AdvApiLookupAccountSid`
+
+#### Rights and Privileges
+
 * `LsaAddAccountRights`: `Invoke-AdvApiLsaAddAccountRights`
 * `LsaClose`: `Invoke-AdvApiLsaClose`
 * `LsaEnumerateAccountRights`: `Invoke-AdvApiLsaEnumerateAccountRights`
@@ -51,8 +56,16 @@ Import-Module -Name '.\PureInvoke'
 
 ### From kernel32.dll
 
-* `Invoke-KernelFindFileName`
-* `Invoke-KernelGetVolumePathName`
+#### File System
+
+* `FindFirstFileNameW` and `FindNextFileNameW`: `Invoke-KernelFindFileName`
+* `GetVolumePathNameW `: `Invoke-KernelGetVolumePathName`
+
+### From netapi32.dll
+
+#### Local Groups
+
+* `NetLocalGroupGetMembers`: `Invoke-NetApiNetLocalGroupGetMembers`
 
 ## Troubleshooting
 
