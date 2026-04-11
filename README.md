@@ -2,7 +2,8 @@
 
 ## Overview
 
-The PureInvoke module contains functions that handles the complexity of using P/Invoke to call Win32 APIs.
+The PureInvoke module contains functions that handles the complexity of using
+[P/Invoke](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke) to call Win32 APIs.
 
 There is no native way to call Win32 APIs in PowerShell. In order to use P/Invoke, you have to compile C# code into an
 assembly, or use PowerShell's `Add-Type` cmdlet to compile it dynamically at runtime. But then you have to worry about
@@ -39,20 +40,41 @@ Import-Module -Name '.\PureInvoke'
 
 ### From advapi32.dll
 
-* `LookupAccountName`: `Invoke-AdvApiLookupAccountName`
-* `LookupAccountSid`: `Invoke-AdvApiLookupAccountSid`
-* `LsaAddAccountRights`: `Invoke-AdvApiLsaAddAccountRights`
-* `LsaClose`: `Invoke-AdvApiLsaClose`
-* `LsaEnumerateAccountRights`: `Invoke-AdvApiLsaEnumerateAccountRights`
-* `LsaFreeMemory`: `Invoke-AdvApiLsaFreeMemory`
-* `LsaNtStatusToWinError`: `Invoke-AdvApiLsaNtStatusToWinError`
-* `LsaOpenPolicy`: `Invoke-AdvApiLsaOpenPolicy`
-* `LsaRemoveAccountRights`: `Invoke-AdvApiLsaRemoveAccountRights`
+#### Accounts (winbase.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`LookupAccountName`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountnamew) | `Invoke-AdvApiLookupAccountName` |
+| [`LookupAccountSid`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsidw) | `Invoke-AdvApiLookupAccountSid` |
+
+#### Rights and Privileges (netsecapi.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`LsaAddAccountRights`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaaddaccountrights) | `Invoke-AdvApiLsaAddAccountRights` |
+| [`LsaClose`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaclose) | `Invoke-AdvApiLsaClose` |
+| [`LsaEnumerateAccountRights`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaenumerateaccountrights) | `Invoke-AdvApiLsaEnumerateAccountRights` |
+| [`LsaFreeMemory`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsafreememory) | `Invoke-AdvApiLsaFreeMemory` |
+| [`LsaNtStatusToWinError`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsantstatustowinerror) | `Invoke-AdvApiLsaNtStatusToWinError` |
+| [`LsaOpenPolicy`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaopenpolicy) | `Invoke-AdvApiLsaOpenPolicy` |
+| [`LsaRemoveAccountRights`](https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaremoveaccountrights) | `Invoke-AdvApiLsaRemoveAccountRights` |
 
 ### From kernel32.dll
 
-* `Invoke-KernelFindFileName`
-* `Invoke-KernelGetVolumePathName`
+#### File System (fileapi.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`FindFirstFileNameW`](https://learn.microsoft.com/en-us/windows/win32/api/FileAPI/nf-fileapi-findfirstfilenamew) and [`FindNextFileNameW`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findnextfilenamew) | `Invoke-KernelFindFileName` |
+| [`GetVolumePathNameW`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumepathnamew) | `Invoke-KernelGetVolumePathName` |
+
+### From netapi32.dll
+
+#### Local Groups (lmaccess.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`NetLocalGroupGetMembers`](https://learn.microsoft.com/en-us/windows/win32/api/lmaccess/nf-lmaccess-netlocalgroupgetmembers) | `Invoke-NetApiNetLocalGroupGetMembers` |
 
 ## Troubleshooting
 
