@@ -30,7 +30,7 @@ function Invoke-AdvApiLookupPrivilegeValue
     * SeServiceLogonRight
 
     .EXAMPLE
-    Invoke-AdvapiLookupPrivilegeName -Name SeDebugPrivilege
+    Invoke-AdvApiLookupPrivilegeName -Name SeDebugPrivilege
 
     Demonstrates how to call this function.
     #>
