@@ -19,7 +19,9 @@
 * `Invoke-AdvApiOpenService` function for calling the advapi32.dll library's `OpenService` method.
 * `Invoke-AdvApiQueryServiceConfig` function for calling the advapi32.dll library's `QueryServiceconfig` method.
 * `Invoke-AdvApiQueryServiceConfig2` function for calling the advapi32.dll library's `QueryServiceconfig2` method.
-* `Invoke-AdvApiQueryServieObjectSecurity` function for calling the advapi32.dll library's `QueryServiceObjectSecurity`
+* `Invoke-AdvApiQueryServiceObjectSecurity` function for calling the advapi32.dll library's `QueryServiceObjectSecurity`
+  method.
+* `Invoke-AdvApiSetServiceObjectSecurity` function for calling the advapi32.dll library's `SetServiceObjectSecurity`
   method.
 
 ### Changed

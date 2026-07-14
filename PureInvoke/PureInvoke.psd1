@@ -93,6 +93,7 @@
         'Invoke-AdvApiQueryServiceConfig',
         'Invoke-AdvApiQueryServiceConfig2',
         'Invoke-AdvApiQueryServiceObjectSecurity',
+        'Invoke-AdvApiSetServiceObjectSecurity',
         'Invoke-KernelFindFileName',
         'Invoke-KernelGetVolumePathName',
         'Invoke-NetApiNetLocalGroupGetMembers',
