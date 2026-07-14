@@ -35,12 +35,14 @@ function Invoke-KernelFindFileName
 
     [PureInvoke_ErrorCode] $errCode = [PureInvoke_ErrorCode]::Ok
 
+    $kernel32 = Get-Kernel32
+
     # Loop over and collect all hard links as their full paths.
     [IntPtr]$findHandle = [IntPtr]::Zero
 
     [StringBuilder] $sbLinkName = [Text.StringBuilder]::New()
     [UInt32] $cchLinkName = $sbLinkName.Capacity
-    $findHandle = [PureInvoke.Kernel32]::FindFirstFileNameW($Path, 0, [ref]$cchLinkName, $sbLinkName)
+    $findHandle = $kernel32::FindFirstFileNameW($Path, 0, [ref]$cchLinkName, $sbLinkName)
     $errCode = [Marshal]::GetLastWin32Error()
     Write-Debug "[Kernel32]::FindFirstFileNameW(""${Path}"", 0, ${cchLinkName}, ""${sbLinkName}"")  return ${findHandle}  GetLastError() ${errCode}"
     if ($script:invalidHandle -eq $findHandle)
@@ -48,7 +50,7 @@ function Invoke-KernelFindFileName
         if ($errCode -eq [PureInvoke_ErrorCode]::MoreData)
         {
             [void]$sbLinkName.EnsureCapacity($cchLinkName)
-            $findHandle = [PureInvoke.Kernel32]::FindFirstFileNameW($Path, 0, [ref]$cchLinkName, $sbLinkName)
+            $findHandle = $kernel32::FindFirstFileNameW($Path, 0, [ref]$cchLinkName, $sbLinkName)
             $errCode = [Marshal]::GetLastWin32Error()
             Write-Debug "[Kernel32]::FindFirstFileNameW(""${Path}"", 0, ${cchLinkName}, ""${sbLinkName}""))  return ${findHandle}  GetLastError() ${errCode}"
             if ($script:invalidHandle -eq $findHandle)
@@ -79,13 +81,13 @@ function Invoke-KernelFindFileName
         {
             [void]$sbLinkName.Clear()
 
-            $result = [PureInvoke.Kernel32]::FindNextFileNameW($findHandle, [ref]$cchLinkName, $sbLinkName)
+            $result = $kernel32::FindNextFileNameW($findHandle, [ref]$cchLinkName, $sbLinkName)
             $errCode = [Marshal]::GetLastWin32Error()
             Write-Debug "[Kernel32]::FindNextFileNameW(${findHandle}, ${cchLinkName}, ""${sbLinkName}""))  return ${result}  GetLastError() ${errCode}"
             if (-not $result -and $errCode -eq [PureInvoke_ErrorCode]::MoreData)
             {
                 [void]$sbLinkName.EnsureCapacity($cchLinkName)
-                $result = [PureInvoke.Kernel32]::FindNextFileNameW($findHandle, [ref]$cchLinkName, $sbLinkName)
+                $result = $kernel32::FindNextFileNameW($findHandle, [ref]$cchLinkName, $sbLinkName)
                 $errCode = [Marshal]::GetLastWin32Error()
                 Write-Debug "[Kernel32]::FindNextFileNameW(${findHandle}, ${cchLinkName}, ""${sbLinkName}""))  return ${result}  GetLastError() ${errCode}"
             }
@@ -122,6 +124,6 @@ function Invoke-KernelFindFileName
     }
     finally
     {
-        [void][PureInvoke.Kernel32]::FindClose($findHandle);
+        [void]$kernel32::FindClose($findHandle);
     }
 }

@@ -16,15 +16,19 @@ function Invoke-AdvApiLookupPrivilegeName
     `LookupPrivilegeName`, not PowerShell.
 
     .EXAMPLE
-    Invoke-AdvapiLookupPrivilegeName -Luid $luid
+    Invoke-AdvApiLookupPrivilegeName -LuidLowPart $luid.LowPart -LuidHighPart $luid.HighPart
 
     Demonstrates how to call this function.
     #>
     [CmdletBinding()]
     param(
-        # The privilege value whose name to lookup.
+        # The low part of the LUID of the priveilege to lookup.
         [Parameter(Mandatory)]
-        [PureInvoke.WinNT.LUID] $LUID,
+        [UInt32] $LuidLowPart,
+
+        # The high part of the LUID of the privilege to lookup.
+        [Parameter(Mandatory)]
+        [int] $LuidHighPart,
 
         # The computer name on which to lookup the value. This parameter is passed to the `LookupPrivilegeValue`
         # function's `SystemName` parameter, i.e. the lookup on the remote computer is done by `LookupPrivilegeValue`
@@ -38,11 +42,16 @@ function Invoke-AdvApiLookupPrivilegeName
     $sbName = [StringBuilder]::New(1)
     $nameLength = $sbName.Capacity
 
+
+    $advApi32 = Get-AdvApi32
+    $luid = $advApi32 | New-PInvokeStruct -Name 'Luid'
+    $luid.LowPart = $LuidLowPart
+    $luid.HighPart = $LuidHighPart
     $ptrLuid = ConvertTo-IntPtr -LUID $LUID
 
     try
     {
-        $result = [PureInvoke.AdvApi32]::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
+        $result = $advApi32::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
         $errCode = [Marshal]::GetLastWin32Error()
 
         if (-not $result)
@@ -50,7 +59,7 @@ function Invoke-AdvApiLookupPrivilegeName
             if ($errCode -eq [PureInvoke_ErrorCode]::InsufficientBuffer)
             {
                 [void]$sbName.EnsureCapacity($nameLength)
-                $result = [PureInvoke.AdvApi32]::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
+                $result = $advApi32::LookupPrivilegeName($ComputerName, $ptrLuid, $sbName, [ref] $nameLength)
                 $errCode = [Marshal]::GetLastWin32Error()
             }
 

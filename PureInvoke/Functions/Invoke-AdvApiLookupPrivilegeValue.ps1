@@ -30,7 +30,7 @@ function Invoke-AdvApiLookupPrivilegeValue
     * SeServiceLogonRight
 
     .EXAMPLE
-    Invoke-AdvapiLookupPrivilegeName -Name SeDebugPrivilege
+    Invoke-AdvApiLookupPrivilegeName -Name SeDebugPrivilege
 
     Demonstrates how to call this function.
     #>
@@ -49,8 +49,9 @@ function Invoke-AdvApiLookupPrivilegeValue
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    [PureInvoke.WinNT.LUID] $luid = [PureInvoke.WinNT.LUID]::New()
-    $result = [PureInvoke.AdvApi32]::LookupPrivilegeValue($ComputerName, $Name, [ref] $luid)
+    $advApi32 = Get-AdvApi32
+    $luid = $advApi32 | New-PInvokeStruct -Name 'Luid'
+    $result = $advApi32::LookupPrivilegeValue($ComputerName, $Name, [ref] $luid)
     $errCode = [Marshal]::GetLastWin32Error()
 
     if (-not $result -and -not (Assert-Win32Error -ErrorCode $errCode))
@@ -58,5 +59,8 @@ function Invoke-AdvApiLookupPrivilegeValue
         return
     }
 
-    return $luid
+    return [pscustomobject]@{
+        LowPart = $luid.LowPart
+        HighPart = $luid.HighPart
+    }
 }

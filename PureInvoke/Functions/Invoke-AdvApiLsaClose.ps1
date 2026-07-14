@@ -34,6 +34,6 @@ function Invoke-AdvApiLsaClose
         return $true
     }
 
-    $ntstatus = [PureInvoke.AdvApi32]::LsaClose($PolicyHandle)
+    $ntstatus = (Get-AdvApi32)::LsaClose($PolicyHandle)
     Assert-NTStatusSuccess -Status $ntstatus -Message 'Invoke-AdvApiLsaClose failed'
 }

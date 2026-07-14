@@ -25,37 +25,32 @@ function Invoke-AdvApiLsaOpenPolicy
         [PureInvoke_LsaLookup_PolicyAccessRights[]] $DesiredAccess,
 
         # The optional computer name whose LSA policy to open. The default is the local computer.
-        [String] $ComputerName,
-
-        # The value of the `LsaOpenPolicy` method's `ObjectAttribute` parameter.
-        [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES] $ObjectAttribute
+        [String] $ComputerName
     )
 
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
-    $lsaSystemName = [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::New([Environment]::MachineName)
-    if ($ComputerName)
+    if (-not $ComputerName)
     {
-        $lsaSystemName = [PureInvoke.LsaLookup.LSA_UNICODE_STRING]::New($ComputerName)
+        $ComputerName = [Environment]::MachineName
     }
 
-    if (-not $ObjectAttribute)
-    {
-        $ObjectAttribute = [PureInvoke.LsaLookup.LSA_OBJECT_ATTRIBUTES]::New()
-        $ObjectAttribute.Length = 0
-        $ObjectAttribute.RootDirectory = [IntPtr]::Zero
-        $ObjectAttribute.Attributes = 0
-        $ObjectAttribute.SecurityDescriptor = [IntPtr]::Zero
-        $ObjectAttribute.SecurityQualityOfService = [IntPtr]::Zero
-    }
+    $advApi32 = Get-AdvApi32
+    $lsaSystemName = $advApi32 | New-PInvokeStruct -Name 'LsaUnicodeString' -ArgumentList ($ComputerName)
+
+    $objAttr = $advApi32 | New-PInvokeStruct -Name 'LsaObjectAttributes'
+    $objAttr.Length = 0
+    $objAttr.RootDirectory = [IntPtr]::Zero
+    $objAttr.Attributes = 0
+    $objAttr.SecurityDescriptor = [IntPtr]::Zero
+    $objAttr.SecurityQualityOfService = [IntPtr]::Zero
 
     $policyHandle = [IntPtr]::Zero
     $accessMask = 0x0
     $DesiredAccess | ForEach-Object { $accessMask = $accessMask -bor $_ }
 
-    $ntstatus = [PureInvoke.AdvApi32]::LsaOpenPolicy([ref] $lsaSystemName, [ref] $ObjectAttribute, $accessMask,
-                                                     [ref] $policyHandle)
+    $ntstatus = $advApi32::LsaOpenPolicy([ref] $lsaSystemName, [ref] $objAttr, $accessMask, [ref] $policyHandle)
 
     if (-not (Assert-NtStatusSuccess -Status $ntstatus -Message "Invoke-AdvApiLsaOpenPolicy failed"))
     {

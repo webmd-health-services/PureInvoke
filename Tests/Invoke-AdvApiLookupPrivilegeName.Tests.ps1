@@ -14,17 +14,15 @@ Describe 'Invoke-AdvApiLookupPrivilegeName' {
     }
 
     It 'fails' {
-        $emptyLuid = [PureInvoke.WinNT.LUID]::New()
-        Invoke-AdvApiLookupPrivilegeName -LUID $emptyLuid -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        Invoke-AdvApiLookupPrivilegeName -LuidLowPart 0 -LuidHighPart 0 -ErrorAction SilentlyContinue |
+            Should -BeNullOrEmpty
         $Global:Error | Should -Match 'specified privilege does not exist'
     }
 
     # In testing, these are the privilege values.
     $privilegeValues = 2..35
     It 'finds privilege <_>' -TestCases $privilegeValues {
-        $luid = [PureInvoke.WinNT.LUID]::New()
-        $luid.LowPart = $_
-        $result = Invoke-AdvApiLookupPrivilegeName -LUID $luid
+        $result = Invoke-AdvApiLookupPrivilegeName -LuidLowPart $_ -LuidHighPart 0
         $Global:Error | Should -BeNullOrEmpty
         $result | Should -Not -BeNullOrEmpty
         $result | Should -Match '^Se.*Privilege$'

@@ -49,21 +49,19 @@ function Invoke-AdvApiLsaRemoveAccountRights
 
     $sidPtr = ConvertTo-IntPtr -Sid $Sid
 
+    $advApi32 = Get-AdvApi32
+
     try
     {
         if ($All)
         {
-            $ntstatus = [PureInvoke.AdvApi32]::LsaRemoveAccountRights($PolicyHandle,
-                                                                 $sidPtr,
-                                                                 $true,
-                                                                 [PureInvoke.LsaLookup.LSA_UNICODE_STRING[]]::New(0),
-                                                                 0)
+            $ntstatus = $advApi32::LsaRemoveAccountRights($PolicyHandle, $sidPtr, $true, @(), 0)
         }
         else
         {
-            [PureInvoke.LsaLookup.LSA_UNICODE_STRING[]] $lsaPrivs = $Privilege | ConvertTo-LsaUnicodeString
+            [Object[]]$lsaPrivs = $Privilege | ConvertTo-LsaUnicodeString
             $ntstatus =
-                [PureInvoke.AdvApi32]::LsaRemoveAccountRights($PolicyHandle, $sidPtr, $false, $lsaPrivs, $lsaPrivs.Length)
+                $advApi32::LsaRemoveAccountRights($PolicyHandle, $sidPtr, $false, $lsaPrivs, $lsaPrivs.Length)
         }
 
         $winErr = Invoke-AdvApiLsaNtStatusToWinError -Status $ntstatus

@@ -1,7 +1,7 @@
 
 Build:
 - PowerShell:
-    ExceptDuring: Clean
+    .ExceptDuring: Clean
     ScriptBlock: prism install | Format-Table -Auto
 
 - Version:
@@ -12,37 +12,26 @@ Build:
     IncrementPrereleaseVersion: true
 
 # Update the AppVeyor build/version number.
-- Exec:
-      OnlyBy: BuildServer
-      Path: appveyor
-      Argument: [ UpdateBuild, -Version, "$(WHISKEY_SEMVER2)+$(WHISKEY_BUILD_NUMBER)" ]
-
-- MSBuild:
-    Path: src\PureInvoke.sln
-
-- CopyFile:
-    Path: src\bin\netstandard1.2\*
-    DestinationDirectory: PureInvoke\bin
+- Exec: appveyor UpdateBuild -Version "$(WHISKEY_SEMVER2)+$(WHISKEY_BUILD_NUMBER)"
+  .OnlyBy: BuildServer
 
 # Dot-sourcing files is expensive. Move all functions into .psm1 file to improve import speed. Do this before testing
 # to ensure the module still works.
 - MergeFile:
-    OnlyBy: BuildServer
+    .OnlyBy: BuildServer
     # Builds run twice on some serves. Only run this step if the module hasn't been merged yet.
-    IfExists: PureInvoke\Functions\*.ps1
+    .IfExists: PureInvoke\Functions\*.ps1
     Path:
     - PureInvoke\Functions\*.ps1
     DestinationPath: PureInvoke\PureInvoke.psm1
     DeleteSourceFiles: true
     TextSeparator: "$(NewLine)$(NewLine)"
 
-- PowerShell:
-    ExceptDuring: Clean
-    Path: init.ps1
+- PowerShell: .\init.ps1
+  .ExceptDuring: Clean
 
-- PowerShell:
-    OnlyDuring: Clean
-    Path: reset.ps1
+- PowerShell: .\reset.ps1
+  .OnlyDuring: Clean
 
 - CopyFile:
     Path:
@@ -60,28 +49,15 @@ Build:
     - "*.pdb"
     - "*.orig"
 
-- Exec:
-    OnlyBy: BuildServer
-    Path: appveyor
-    Argument: [ 'PushArtifact', '.output/PureInvoke-$(WHISKEY_SEMVER2).zip', '-DeploymentName', 'GitHub' ]
+- Exec: appveyor PushArtifact "$(WHISKEY_OUTPUT_DIRECTORY)/PureInvoke-$(WHISKEY_SEMVER2).zip" -DeploymentName 'GitHub'
+  .OnlyBy: BuildServer
 
 - PublishPowerShellModule:
     Path: PureInvoke
 
-- Exec:
-    OnlyBy: BuildServer
-    Path: appveyor
-    Argument: [
-        'PushArtifact',
-        '.output/PureInvoke.$(WHISKEY_SEMVER2_NO_BUILD_METADATA).nupkg',
-        '-DeploymentName',
-        'PowerShellGallery'
-    ]
+- Exec: appveyor PushArtifact "$(WHISKEY_OUTPUT_DIRECTORY)/PureInvoke.$(WHISKEY_SEMVER2_NO_BUILD_METADATA).nupkg" -DeploymentName 'PowerShellGallery'
+  .OnlyBy: BuildServer
 
-Tests:
-- PowerShell:
-    ExceptDuring: Clean
-    ScriptBlock: prism install | Format-Table -Auto
 - Pester:
     Configuration:
         Run:

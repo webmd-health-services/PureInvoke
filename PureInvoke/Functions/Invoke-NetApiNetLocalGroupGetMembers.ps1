@@ -46,28 +46,30 @@ function Invoke-NetApiNetLocalGroupGetMembers
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
+    $netApi32 = Get-NetApi32
+
     function New-InfoObject
     {
         switch ($Level)
         {
             0
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_0]::New()
+                return $netApi32 | New-PInvokeStruct -Name 'LocalGroupMembersInfo0'
             }
 
             1
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_1]::New()
+                return $netApi32 | New-PInvokeStruct -Name 'LocalGroupMembersInfo1'
             }
 
             2
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_2]::New()
+                return $netApi32 | New-PInvokeStruct -Name 'LocalGroupMembersInfo2'
             }
 
             3
             {
-                return [PureInvoke.Lmaccess.LOCALGROUP_MEMBERS_INFO_3]::New()
+                return $netApi32 | New-PInvokeStruct -Name 'LocalGroupMembersInfo3'
             }
         }
     }
@@ -79,14 +81,14 @@ function Invoke-NetApiNetLocalGroupGetMembers
 
     do
     {
-        $status = [PureInvoke.NetApi32]::NetLocalGroupGetMembers($ComputerName,
-                                                                 $LocalGroupName,
-                                                                 $Level,
-                                                                 [ref] $buffer,
-                                                                 -1,
-                                                                 [ref] $entriesRead,
-                                                                 [ref] $totalEntries,
-                                                                 [ref] $resume)
+        $status = $netApi32::NetLocalGroupGetMembers($ComputerName,
+                                                     $LocalGroupName,
+                                                     $Level,
+                                                     [ref] $buffer,
+                                                     -1,
+                                                     [ref] $entriesRead,
+                                                     [ref] $totalEntries,
+                                                     [ref] $resume)
         if ($status -ne [PureInvoke_ErrorCode]::NERR_Success)
         {
             $msg = "Failed getting members of group ""${LocalGroupName}"""
@@ -100,11 +102,10 @@ function Invoke-NetApiNetLocalGroupGetMembers
             for($i = 0; $i -lt $entriesRead; $i++)
             {
                 $member = New-InfoObject
-                [Marshal]::PtrToSTructure($itemAddr, [Type]$member.GetType()) |
-                    Write-Output
+                [Marshal]::PtrToSTructure($itemAddr, [Type]$member.GetType()) | Write-Output
                 $itemAddr = [IntPtr]::New($itemAddr.ToInt64() + [Int64][Marshal]::SizeOf($member))
             }
-            $status = [PureInvoke.NetApi32]::NetApiBufferFree($buffer)
+            $status = $netApi32::NetApiBufferFree($buffer)
             Assert-Win32Error -ErrorCode $status | Out-Null
         }
     }
