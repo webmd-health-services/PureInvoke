@@ -1,16 +1,12 @@
 
-Migrate these from Carbon:
+[ ] Create functions that expose APIs to allow access to service's system DACL. Update the tests for
+QueryServiceObjectSecurity and SetServiceObjectSecurity to validate they work. REmove "unsupported" comments in
+Invoke-AdvApiQueryServiceObjectSecurity documentation.
 
-[ ] [Carbon.Service.ServiceSecurity]::GetServiceSecurityDescriptor($Name)
-    [ ] advapi32: QueryServiceObjectSecurity
-[x] [Carbon.Service.ServiceInfo]
-    [x] advapi: OpenSCManager
-    [x] advapi: CloseServiceHandle
-    [x] advapi: OpenService
-    [x] advapi: QueryServiceConfig2
-    [x] advapi: QueryServiceConfig
-[ ] [Carbon.Security.ServiceAccessRule]
-[ ] [Carbon.Security.ServiceAccessRights]
-[x] [Carbon.Service.FailureAction]
-[ ] [Carbon.Service.ServiceSecurity]::SetServiceSecurityDescriptor
-    [ ] advapi: SetServiceObjectSecurity
+> The handle specified by hService must have ACCESS_SYSTEM_SECURITY access.
+> To obtain ACCESS_SYSTEM_SECURITY access:
+>
+> * Enable the SE_SECURITY_NAME privilege in the current access token of the caller.
+> * Open the handle for ACCESS_SYSTEM_SECURITY access.
+> * Disable the privilege.
+

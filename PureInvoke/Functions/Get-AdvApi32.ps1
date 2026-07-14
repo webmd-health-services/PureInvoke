@@ -274,6 +274,11 @@ function Get-AdvApi32
         {
             public uint LaunchProtected;
         }
+
+        [DllImport("advapi32.dll", SetLastError=true)]
+        public static extern bool QueryServiceObjectSecurity(IntPtr hService, uint dwSecurityInformation,
+                                                              byte[] lpSecurityDescriptor, uint cbBufSize,
+                                                              out uint pcbBytesNeeded);
 "@
 
     return Add-PInvokeType -DllName 'AdvApi32' -Definition $advApi
