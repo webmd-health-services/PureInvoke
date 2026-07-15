@@ -177,6 +177,10 @@ function Invoke-AdvApiQueryServiceConfig2
         if ($InfoLevel -eq [PureInvoke_ServiceInfoLevel]::RequiredPrivileges)
         {
             [String[]]$privs = ConvertFrom-MultiString -Handle $info.RequiredPrivileges
+            if ($null -eq $privs)
+            {
+                $privs = [String[]]::New(0)
+            }
 
             return [pscustomobject]@{
                 RequiredPrivileges = $privs
