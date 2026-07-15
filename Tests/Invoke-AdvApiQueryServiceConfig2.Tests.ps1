@@ -283,7 +283,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
             foreach ($action in $config.Actions)
             {
                 $action | Should -Not -BeNullOrEmpty
-                $action.Type -is [Enum] -or $action.Type -is [UInt32] | Should -BeTrue
+                $action.Type | Should -BeOfType ([Enum])
                 $action.Delay | Should -BeOfType ([UInt32])
             }
 

@@ -130,15 +130,9 @@ function Invoke-AdvApiQueryServiceConfig2
                 $ptrAction = [IntPtr]::Add($info.Actions, $offset)
                 [Marshal]::PtrToStructure($ptrAction, $action)
 
-                $failureAction = $action.Type
-                if ($script:failureActions.Contains($failureAction))
-                {
-                    $failureAction = [PureInvoke_ServiceFailureAction]$failureAction
-                }
-
                 [void]$actions.Add(
                     [pscustomobject]@{
-                        Type = $failureAction
+                        Type = [PureInvoke_ServiceFailureAction]$action.Type
                         Delay = $action.Delay
                     }
                 )

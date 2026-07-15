@@ -337,15 +337,15 @@ enum PureInvoke_ServiceInfoLevel
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
+# https://github.com/tpn/winsdk-10/blob/master/Include/10.0.16299.0/um/winsvc.h#L522-L528
 enum PureInvoke_ServiceFailureAction
 {
     None = 0
     Restart = 1
     Reboot = 2
     RunCommand = 3
+    OwnRestart = 4
 }
-$script:failureActions = [Collections.Generic.HashSet[UInt32]]::New()
-[Enum]::GetValues([PureInvoke_ServiceFailureAction]) | ForEach-Object { $script:failureActions.Add($_) } | Out-Null
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_sid_info
 enum PureInvoke_ServiceSidType
