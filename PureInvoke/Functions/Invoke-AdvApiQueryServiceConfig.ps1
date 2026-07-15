@@ -68,6 +68,11 @@ function Invoke-AdvApiQueryServiceConfig
     [Marshal]::PtrToStructure($ptrInfo, $config)
     [Marshal]::FreeHGlobal($ptrInfo)
 
+    [String[]]$dependencies = ConvertFrom-MultiString -Handle $config.Dependencies
+    if ($null -eq $dependencies)
+    {
+        $dependencies = [String[]]::New(0)
+    }
     return [pscustomobject] @{
         ServiceType = [Enum]::ToObject([ServiceProcess.ServiceType], $config.ServiceType)
         StartType = [Enum]::ToObject([ServiceProcess.ServiceStartMode], $config.StartType)
@@ -75,7 +80,7 @@ function Invoke-AdvApiQueryServiceConfig
         BinaryPathName = $config.BinaryPathName
         LoadOrderGroup = $config.LoadOrderGroup
         TagID = $config.TagId
-        Dependencies = $config.Dependencies
+        Dependencies = $dependencies
         ServiceStartName = $config.ServiceStartName
         DisplayName = $config.DisplayName
     }

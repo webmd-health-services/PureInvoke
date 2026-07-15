@@ -166,8 +166,7 @@ function Get-AdvApi32
 
 			public uint TagID;
 
-            [MarshalAs(UnmanagedType.LPWStr)]
-			public string Dependencies;
+			public IntPtr Dependencies;
 
 			[MarshalAs(UnmanagedType.LPWStr)]
 			public string ServiceStartName;

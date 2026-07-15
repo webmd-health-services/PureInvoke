@@ -54,18 +54,40 @@ Describe 'Invoke-AdvApiQueryServiceConfig' {
         $info.BinaryPathName | Should -Be 'C:\Windows\system32\svchost.exe -k LocalService'
         $info.LoadOrderGroup | Should -Be ''
         $info.TagID | Should -Be 0
+        $info.Dependencies | Sort-Object | Should -Be ($svc.ServicesDependedOn | Select-Object 'Name' | Sort-Object)
         $info.ServiceStartName | Should -Be 'NT AUTHORITY\LocalService'
         $info.DisplayName | Should -Be 'Windows Time'
     }
 
     $svcNames = Get-Service | Select-Object -ExpandProperty 'Name'
     It 'queries <_> service' -ForEach $svcNames {
+        $svc = Get-Service -Name $_
         $svcHandle =
             Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle -ServiceName $_ -DesiredAccess QueryConfig
         try
         {
-            { Invoke-AdvApiQueryServiceConfig -ServiceHandle $svcHandle } | Should -Not -Throw
+            $config = Invoke-AdvApiQueryServiceConfig -ServiceHandle $svcHandle
             ThenError -IsEmpty
+
+            $config | Should -Not -BeNullOrEmpty
+            $config.ServiceType | Should -BeOfType ([Enum])
+            $config.StartType | Should -Be $svc.StartType
+            $config.ErrorControl | Should -BeOfType ([Enum])
+            $config.BinaryPathName | Should -BeOfType ([String])
+            $config.LoadOrderGroup | Should -BeOfType ([String])
+            $config.TagID | Should -Not -BeNullOrEmpty
+            # Get-Service doesn't report all the RemoteAccess service's dependencies
+            $null -eq $config.Dependencies | Should -BeFalse
+            ,$config.Dependencies | Should -BeOfType ([String[]])
+            if ($_ -ne 'RemoteAccess')
+            {
+                $config.Dependencies |
+                    Sort-Object |
+                    Should -Be ($svc.ServicesDependedOn | Select-Object -ExpandProperty 'Name' | Sort-Object)
+            }
+            $config.ServiceStartName | Should -BeOfType ([String])
+            $config.DisplayName | Should -Be $svc.DisplayName
+
         }
         finally
         {
