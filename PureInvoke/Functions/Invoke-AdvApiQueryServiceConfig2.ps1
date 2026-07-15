@@ -204,12 +204,7 @@ function Invoke-AdvApiQueryServiceConfig2
                 [IntPtr]$ptrTrigger = [IntPtr]::Add($info.Triggers, ($sizeOfTrigger * $triggerIdx))
                 [Marshal]::PtrToStructure($ptrTrigger, $trigger)
 
-                # There are some undocumented values: 7 and 30.
-                $triggerType = $trigger.Type
-                if ($script:triggerTypes.Contains($triggerType))
-                {
-                    $triggerType = [PureInvoke_ServiceTriggerType]$triggerType
-                }
+                $triggerType = [PureInvoke_ServiceTriggerType]$trigger.Type
 
                 $subtype = [Marshal]::PtrToStructure($trigger.Subtype, ([Type][Guid]))
 

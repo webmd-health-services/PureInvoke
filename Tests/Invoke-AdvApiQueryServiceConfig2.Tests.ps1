@@ -315,7 +315,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
             foreach ($trigger in $config.Triggers)
             {
                 $trigger | Should -Not -BeNullOrEmpty
-                $trigger.Type -is [Enum] -or $trigger.Type -is [UInt32] | Should -BeTrue
+                $trigger.Type | Should -BeOfType ([Enum])
                 $trigger.Action | Should -BeOfType ([Enum])
                 ,$trigger.DataItems | Should -BeOfType ([Object[]])
 

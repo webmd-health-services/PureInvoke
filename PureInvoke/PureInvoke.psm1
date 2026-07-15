@@ -356,18 +356,19 @@ enum PureInvoke_ServiceSidType
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger
+# https://github.com/tpn/winsdk-10/blob/master/Include/10.0.16299.0/um/winsvc.h#L318-L326
 enum PureInvoke_ServiceTriggerType
 {
-    DeviceInterfaceArrival =  1
-    IPAddressAvailability  =  2
-    DomainJoin             =  3
-    FirewallPortEvent      =  4
-    GroupPolicy            =  5
-    NetworkEndpoint        =  6
-    Custom                 = 20
+    DeviceInterfaceArrival  =  1
+    IPAddressAvailability   =  2
+    DomainJoin              =  3
+    FirewallPortEvent       =  4
+    GroupPolicy             =  5
+    NetworkEndpoint         =  6
+    CustomSystemStateChange =  7
+    Custom                  = 20
+    Aggregate               = 30
 }
-$script:triggerTypes = [Collections.Generic.HashSet[UInt32]]::New()
-[Enum]::GetValues([PureInvoke_ServiceTriggerType]) | ForEach-Object { $script:triggertypes.Add($_) } | Out-Null
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_launch_protected_info
 enum PureInvoke_ServiceProtectionType
