@@ -1,6 +1,10 @@
 
 function Get-AdvApi32
 {
+    [CmdletBinding()]
+    param(
+    )
+
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
