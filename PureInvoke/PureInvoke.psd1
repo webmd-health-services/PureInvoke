@@ -95,6 +95,7 @@
         'Invoke-AdvApiQueryServiceObjectSecurity',
         'Invoke-AdvApiSetServiceObjectSecurity',
         'Invoke-KernelFindFileName',
+        'Invoke-KernelGetNumaHighestNodeNumber',
         'Invoke-KernelGetVolumePathName',
         'Invoke-NetApiNetLocalGroupGetMembers',
         'Test-PInvokeHandle'

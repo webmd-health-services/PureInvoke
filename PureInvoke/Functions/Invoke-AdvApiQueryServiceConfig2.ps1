@@ -26,6 +26,11 @@ function Invoke-AdvApiQueryServiceConfig2
     native structures. Property names don't have the unmanaged type prefixes (e.g. `Description` instead of
     `lpDescription`). All unmanaged types are converted to managed types.
 
+    Requesting preferred node information requires that NUMA is configured on the system. If NUMA isn't configured, the
+    `QueryServiceConfig2` function will fail with "parameter is incorrect"" error when requesting preferred node
+    information. Use `Invoke-KernelGetNumaHighestNodeNumber` to determine if NUMA is enabled. It returns a non-zero
+    value when NUMA is configured, or 0 if NUMA is not configured.
+
     .EXAMPLE
     Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $handle -InfoLevel Description
 

@@ -80,6 +80,12 @@ Import-Module -Name '.\PureInvoke'
 | [`FindFirstFileNameW`](https://learn.microsoft.com/en-us/windows/win32/api/FileAPI/nf-fileapi-findfirstfilenamew) and [`FindNextFileNameW`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findnextfilenamew) | `Invoke-KernelFindFileName` |
 | [`GetVolumePathNameW`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumepathnamew) | `Invoke-KernelGetVolumePathName` |
 
+#### System Topology (systemtopologyapi.h)
+
+| Win32 Function | PureInvoke Function |
+| -------------- | ------------------- |
+| [`GetNumaHighestNodeNumber`](https://learn.microsoft.com/en-us/windows/win32/api/systemtopologyapi/nf-systemtopologyapi-getnumahighestnodenumber) | `Invoke-KernelGetNumaHighestNodeNumber` |
+
 ### From netapi32.dll
 
 #### Local Groups (lmaccess.h)
