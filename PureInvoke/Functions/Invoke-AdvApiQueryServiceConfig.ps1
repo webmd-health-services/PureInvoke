@@ -66,22 +66,28 @@ function Invoke-AdvApiQueryServiceConfig
 
     $config = $advApi | New-PInvokeStruct -Name 'ServiceConfig'
     [Marshal]::PtrToStructure($ptrInfo, $config)
-    [Marshal]::FreeHGlobal($ptrInfo)
 
-    [String[]]$dependencies = ConvertFrom-MultiString -Handle $config.Dependencies
-    if ($null -eq $dependencies)
+    try
     {
-        $dependencies = [String[]]::New(0)
+        [String[]]$dependencies = ConvertFrom-MultiString -Handle $config.Dependencies
+        if ($null -eq $dependencies)
+        {
+            $dependencies = [String[]]::New(0)
+        }
+        return [pscustomobject] @{
+            ServiceType = [Enum]::ToObject([ServiceProcess.ServiceType], $config.ServiceType)
+            StartType = [Enum]::ToObject([ServiceProcess.ServiceStartMode], $config.StartType)
+            ErrorControl = [PureInvoke_ServiceErrorControl]$config.ErrorControl
+            BinaryPathName = $config.BinaryPathName
+            LoadOrderGroup = $config.LoadOrderGroup
+            TagID = $config.TagId
+            Dependencies = $dependencies
+            ServiceStartName = $config.ServiceStartName
+            DisplayName = $config.DisplayName
+        }
     }
-    return [pscustomobject] @{
-        ServiceType = [Enum]::ToObject([ServiceProcess.ServiceType], $config.ServiceType)
-        StartType = [Enum]::ToObject([ServiceProcess.ServiceStartMode], $config.StartType)
-        ErrorControl = [PureInvoke_ServiceErrorControl]$config.ErrorControl
-        BinaryPathName = $config.BinaryPathName
-        LoadOrderGroup = $config.LoadOrderGroup
-        TagID = $config.TagId
-        Dependencies = $dependencies
-        ServiceStartName = $config.ServiceStartName
-        DisplayName = $config.DisplayName
+    finally
+    {
+        [Marshal]::FreeHGlobal($ptrInfo)
     }
 }
