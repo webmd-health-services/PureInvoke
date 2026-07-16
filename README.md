@@ -68,6 +68,8 @@ Import-Module -Name '.\PureInvoke'
 | [`OpenServiceW`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openservicew) | `Invoke-AdvApiOpenService` |
 | [`QueryServiceConfigW`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfigw) | `Invoke-AdvApiQueryServiceConfig` |
 | [`QueryServiceConfig2`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2w) | `Invoke-AdvApiQueryServiceConfig2` |
+| [`QueryServiceObjectSecurity`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceobjectsecurity) | `Invoke-AdvApiQueryServiceObjectSecurity` |
+| [`SetServiceObjectSecurity`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-setserviceobjectsecurity) | `Invoke-AdvApiSetServiceObjectSecurity` |
 
 ### From kernel32.dll
 

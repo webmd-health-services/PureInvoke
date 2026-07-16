@@ -13,12 +13,16 @@
 
 ### Added
 
-* `LuidLowPart` and `LuidHighPart` parameters to the `Invoke-AdvApiLookupPrivilegeName` function.
-* `Invoke-AdvApiOpenSCManager` function for calling the advapi32.dll library's `OpenSCManager` function.
-* `Invoke-AdvApiCloseServiceHandle` function for calling the advapi32.dll library's `CloseServiceHandle` function.
-* `Invoke-AdvApiOpenService` function for calling the advapi32.dll library's `OpenService` function.
-* `Invoke-AdvApiQueryServiceConfig` function for calling the advapi32.dll library's `QueryServiceconfig` function.
-* `Invoke-AdvApiQueryServiceConfig2` function for calling the advapi32.dll library's `QueryServiceconfig2` function.
+* `LuidLowPart` and `LuidHighPart` parameters to the `Invoke-AdvApiLookupPrivilegeName` method.
+* `Invoke-AdvApiOpenSCManager` function for calling the advapi32.dll library's `OpenSCManager` method.
+* `Invoke-AdvApiCloseServiceHandle` function for calling the advapi32.dll library's `CloseServiceHandle` method.
+* `Invoke-AdvApiOpenService` function for calling the advapi32.dll library's `OpenService` method.
+* `Invoke-AdvApiQueryServiceConfig` function for calling the advapi32.dll library's `QueryServiceconfig` method.
+* `Invoke-AdvApiQueryServiceConfig2` function for calling the advapi32.dll library's `QueryServiceconfig2` method.
+* `Invoke-AdvApiQueryServiceObjectSecurity` function for calling the advapi32.dll library's `QueryServiceObjectSecurity`
+  method.
+* `Invoke-AdvApiSetServiceObjectSecurity` function for calling the advapi32.dll library's `SetServiceObjectSecurity`
+  method.
 
 ### Changed
 

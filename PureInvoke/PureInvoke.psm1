@@ -14,6 +14,7 @@
 
 using namespace System.ComponentModel
 using namespace System.Runtime.InteropServices
+using namespace System.Security.AccessControl
 using namespace System.Security.Principal
 using namespace System.ServiceProcess
 using namespace System.Text
