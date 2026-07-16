@@ -59,7 +59,10 @@ Describe 'Invoke-AdvApiQueryServiceConfig' {
         $info.DisplayName | Should -Be 'Windows Time'
     }
 
-    $svcNames = Get-Service | Select-Object -ExpandProperty 'Name' | Where-Object { $_ -notlike 'CDPUserSvc*' }
+    $svcNames =
+        Get-Service -ErrorAction Ignore |
+        Select-Object -ExpandProperty 'Name' |
+        Where-Object { $_ -notlike 'CDPUserSvc*' }
     It 'queries <_> service' -ForEach $svcNames {
         $svc = Get-Service -Name $_
         $svcHandle =

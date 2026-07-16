@@ -250,7 +250,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
         }
     }
 
-    $svcNames = Get-Service | Select-Object -ExpandProperty 'Name'
+    $svcNames = Get-Service -ErrorAction Ignore | Select-Object -ExpandProperty 'Name'
     It 'queries <_> service' -ForEach $svcNames {
         $svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle `
                                               -ServiceName $_ `
