@@ -329,6 +329,22 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
             }
 
             ThenError -IsEmpty
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle `
+                                                       -InfoLevel PreferredNode `
+                                                       -ErrorAction SilentlyContinue
+            if (-not $config)
+            {
+                # Failed with "invalid parameter" because NUMA isn't enabled.
+                ThenError -Matches 'service''s PreferredNode configuration.*87.*'
+            }
+            else
+            {
+                ThenError -IsEmpty
+                $config.PreferredNode | Should -BeOfType ([UInt16])
+                $config.PreferredNode | Should -BeGreaterThan 0
+            }
+
         }
         finally
         {
