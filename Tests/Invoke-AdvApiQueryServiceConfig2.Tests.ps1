@@ -89,7 +89,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
             $info = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle `
                                                      -InfoLevel PreferredNode `
                                                      -ErrorAction SilentlyContinue
-            ThenError -Matches 'failed to determine memory needed to read PreferredNode'
+            ThenError -Matches 'failed to determine memory needed to read service''s PreferredNode'
             $info | Should -BeNullOrEmpty
         }
 

@@ -90,7 +90,7 @@ function Invoke-AdvApiQueryServiceConfig2
     $lastError = [Marshal]::GetLastWin32Error()
     if (-not $ok -and $lastError -ne [PureInvoke_ErrorCode]::InsufficientBuffer)
     {
-        $msg = "Failed to determine memory needed to read ${InfoLevel} service configuration."
+        $msg = "Failed to determine memory needed to read service's ${InfoLevel} configuration."
         Write-Win32Error -ErrorCode $lastError -Message $msg
         return
     }
@@ -100,7 +100,7 @@ function Invoke-AdvApiQueryServiceConfig2
     $lastError = [Marshal]::GetLastWin32Error()
     if (-not $ok)
     {
-        Write-Win32Error -ErrorCode $lastError -Message "Failed to query service ${InfoLevel} configuration."
+        Write-Win32Error -ErrorCode $lastError -Message "Failed to read service's ${InfoLevel} configuration."
         return
     }
 
