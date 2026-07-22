@@ -114,65 +114,65 @@ Add-Type -AssemblyName 'System.ServiceProcess'
 # https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes
 enum PureInvoke_ErrorCode
 {
-    Ok                       = 0x000
-    NERR_Success             = 0x000
-    Success                  = 0x000
-    InvalidFunction          = 0x001
-    FileNotFound             = 0x002
-    AccessDenied             = 0x005
-    InvalidHandle            = 0x006
-    HandleEof                = 0x026    #   38
-    InvalidParameter         = 0x057    #   87
-    InsufficientBuffer       = 0x07A    #  122
-    AlreadyExists            = 0x0B7    #  183
-    EnvVarNotFound           = 0x0cb    #  203
-    MoreData                 = 0x0ea    #  234
-    NoMoreItems              = 0x103    #  259
-    InvalidFlags             = 0x3EC    # 1004
-    ServiceMarkedForDelete   = 0x430    # 1072
-    NoneMapped               = 0x534    # 1332
-    NoSuchAlias              = 0x560    # 1376
-    MemberNotInAlias         = 0x561    # 1377
-    MemberInAlias            = 0x562    # 1378
-    NoSuchMember             = 0x56B    # 1387
-    InvalidMember            = 0x56C    # 1388
-    NERR_GroupNotFound       = 0x8AC    # 2220
-    NERR_InvalidComputer     = 0x92f    # 2351
+    Ok                       =    0
+    NERR_Success             =    0
+    Success                  =    0
+    InvalidFunction          =    1
+    FileNotFound             =    2
+    AccessDenied             =    5
+    InvalidHandle            =    6
+    HandleEof                =   38 # 0x026
+    InvalidParameter         =   87 # 0x057
+    InsufficientBuffer       =  122 # 0x07A
+    AlreadyExists            =  183 # 0x0B7
+    EnvVarNotFound           =  203 # 0x0cb
+    MoreData                 =  234 # 0x0ea
+    NoMoreItems              =  259 # 0x103
+    InvalidFlags             = 1004 # 0x3EC
+    ServiceMarkedForDelete   = 1072 # 0x430
+    NoneMapped               = 1332 # 0x534
+    NoSuchAlias              = 1376 # 0x560
+    MemberNotInAlias         = 1377 # 0x561
+    MemberInAlias            = 1378 # 0x562
+    NoSuchMember             = 1387 # 0x56B
+    InvalidMember            = 1388 # 0x56C
+    NERR_GroupNotFound       = 2220 # 0x8AC
+    NERR_InvalidComputer     = 2351 # 0x92f
 }
 
 # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lsad/b61b7268-987a-420b-84f9-6c75f8dc8558
 [Flags()]
 enum PureInvoke_LsaLookup_PolicyAccessRights
 {
-    LocalInformation = 0x1
-    AuditInformation = 0x2
-    GetPrivateInformation = 0x4
-    TrustAdmin = 0x8
-    CreateAccount = 0x10
-    CreateSecret = 0x20
-    CreatePrivilege = 0x40
-    SetQuotaDefaultLimits = 0x80
-    SetAuditRequirements = 0x100
-    AuditLogAdmin = 0x200
-    ServerAdmin = 0x400
-    LookupNames = 0x800
-    Notification = 0x1000
+    LocalInformation      = 0x0001
+    AuditInformation      = 0x0002
+    GetPrivateInformation = 0x0004
+    TrustAdmin            = 0x0008
+    CreateAccount         = 0x0010
+    CreateSecret          = 0x0020
+    CreatePrivilege       = 0x0040
+    SetQuotaDefaultLimits = 0x0080
+    SetAuditRequirements  = 0x0100
+    AuditLogAdmin         = 0x0200
+    ServerAdmin           = 0x0400
+    LookupNames           = 0x0800
+    Notification          = 0x1000
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-sid_name_use
 enum PureInvoke_SidNameUse
 {
-    User = 1
-    Group = 2
-    Domain = 3
-    Alias = 4
-    WellKnownGroup = 5
-    DeletedAccount = 6
-    Invalid = 7
-    Unknown = 8
-    Computer = 9
-    Label = 10
-    LogonSession = 11
+    User           =  1
+    Group          =  2
+    Domain         =  3
+    Alias          =  4
+    WellKnownGroup =  5
+    DeletedAccount =  6
+    Invalid        =  7
+    Unknown        =  8
+    Computer       =  9
+    Label          = 10
+    LogonSession   = 11
 }
 
 # PowerShell doesn't let enumerations use values defined in the same enumeration, so create private enums so we only
@@ -314,9 +314,9 @@ enum PureInvoke_ServiceAccessRights
 [Flags()]
 enum PureInvoke_ServiceErrorControl
 {
-    Ignore = 0
-    Normal = 1
-    Severe = 2
+    Ignore   = 0
+    Normal   = 1
+    Severe   = 2
     Critical = 3
 }
 
@@ -324,25 +324,25 @@ enum PureInvoke_ServiceErrorControl
 [Flags()]
 enum PureInvoke_ServiceInfoLevel
 {
-    Description        = 0x1
-    FailureActions     = 0x2
-    DelayedAutoStart   = 0x3
-    FailureActionsFlag = 0x4
-    SidType            = 0x5
-    RequiredPrivileges = 0x6
-    Preshutdown        = 0x7
-    Triggers           = 0x8
-    PreferredNode      = 0x9
-    LaunchProtected    = 0xc
+    Description        =  1
+    FailureActions     =  2
+    DelayedAutoStart   =  3
+    FailureActionsFlag =  4
+    SidType            =  5
+    RequiredPrivileges =  6
+    Preshutdown        =  7
+    Triggers           =  8
+    PreferredNode      =  9
+    LaunchProtected    = 12
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
 # https://github.com/tpn/winsdk-10/blob/master/Include/10.0.16299.0/um/winsvc.h#L522-L528
 enum PureInvoke_ServiceFailureAction
 {
-    None = 0
-    Restart = 1
-    Reboot = 2
+    None       = 0
+    Restart    = 1
+    Reboot     = 2
     RunCommand = 3
     OwnRestart = 4
 }
@@ -350,9 +350,9 @@ enum PureInvoke_ServiceFailureAction
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_sid_info
 enum PureInvoke_ServiceSidType
 {
-    None         = 0x0
-    Unrestricted = 0x1
-    Restricted   = 0x3
+    None         = 0
+    Unrestricted = 1
+    Restricted   = 3
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger
@@ -373,27 +373,27 @@ enum PureInvoke_ServiceTriggerType
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_launch_protected_info
 enum PureInvoke_ServiceProtectionType
 {
-    None = 0
-    Windows = 1
-    WindowsLight = 2
+    None             = 0
+    Windows          = 1
+    WindowsLight     = 2
     AntimalwareLight = 3
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger
 enum PureInvoke_ServiceTriggerAction
 {
-    Start = 0x1
-    Stop  = 0x2
+    Start = 1
+    Stop  = 2
 }
 
 # https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger_specific_data_item
 enum PureInvoke_ServiceTriggerDataType
 {
-    Binary = 0x1
-    String = 0x2
-    Level  = 0x3
-    KeywordAny = 0x4
-    KeywordAll = 0x5
+    Binary     = 1
+    String     = 2
+    Level      = 3
+    KeywordAny = 4
+    KeywordAll = 5
 }
 
 # Store each of your module's functions in its own file in the Functions
