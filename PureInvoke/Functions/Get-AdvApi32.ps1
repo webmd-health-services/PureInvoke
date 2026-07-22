@@ -224,7 +224,7 @@ function Get-AdvApi32
 		[StructLayout(LayoutKind.Sequential)]
         public class ServiceConfigPreferredNode
         {
-            public short PreferredNode;
+            public ushort PreferredNode;
             public bool Delete;
         }
 
