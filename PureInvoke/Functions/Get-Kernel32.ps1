@@ -1,6 +1,10 @@
 
 function Get-Kernel32
 {
+    [CmdletBinding()]
+    param(
+    )
+
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
@@ -21,6 +25,9 @@ function Get-Kernel32
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr LocalFree(IntPtr hMem);
+
+        [DllImport("kernel32.dll", SetLastError=true)]
+        public static extern bool GetNumaHighestNodeNumber(out uint highestNodeNumber);
 "@
 
     return Add-PInvokeType -DllName 'Kernel32' -Definition $kernel32

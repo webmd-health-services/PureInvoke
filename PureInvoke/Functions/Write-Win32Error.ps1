@@ -6,10 +6,12 @@ function Write-Win32Error
     Writes an error message for a Win32 error code.
 
     .DESCRIPTION
-    The `Write-Win32Error` function writes an error mesage for a Win32 error code. Pass the error code to
-    `Write-Win32Error`. PowerShell calls methods that sets the last error, so its important that you call
-    `[Marshal]::GetLastWin32Error()` directly after calling a Win32 method, otherwise you risk reporting an error caused
-    by PowerShell. For example,
+    The `Write-Win32Error` function writes an error mesage from a Windows error code. Pass the error code to
+    `Write-Win32Error`. The function writes an error and sets the error's `Exception` to be a
+    `[ComponentModel.Win32Exception]` object.
+
+    Call `[Marshal]::GetLastWin32Error()` directly after calling a Windows functiton, otherwise you risk reporting an
+    error caused by PowerShell itself. For example,
 
         $result = (Get-AdvApi32)::CloseServiceHandle($Handle)
         $lastError = [Marshal]::GetLastWin32Error()
@@ -18,10 +20,12 @@ function Write-Win32Error
             Write-Win32Error -ErrorCode $lastError -Message "Failed to close service handle"
         }
 
-    Note how the error code is read directly after calling the Win32 API, even before checking the result of the method
-    call.
+    Note how the error code is read directly after calling the Windows API, even before checking the result of the
+    method call. This avoids `[Marshal]::GetLastWin32Error()` returning an error caused by PowerShell itself calling a
+    Windows API.
 
-    Pass a custom message to the `Message` parameter. The Win32 error message is appended to any message that is passed.
+    Pass a custom message to the `Message` parameter. The Windows error message is appended to any message that is
+    passed.
 
     .EXAMPLE
     Write-Win32Error -ErrorCode $lastError
@@ -54,5 +58,5 @@ function Write-Win32Error
     }
 
     $msg = "${Message}$($win32Ex.Message)${period} (0x$($win32Ex.ErrorCode.ToString('x'))/$($win32Ex.NativeErrorCode))"
-    Write-Error -Message $msg -ErrorAction $ErrorActionPreference
+    Write-Error -Exception $win32Ex -Message $msg -ErrorAction $ErrorActionPreference
 }

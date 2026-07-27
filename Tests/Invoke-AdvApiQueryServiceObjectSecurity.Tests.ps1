@@ -5,6 +5,14 @@ using namespace System.Security.Principal
 #Requires -Version 5.1
 Set-StrictMode -Version 'Latest'
 
+BeforeDiscovery {
+    Set-StrictMode -Version 'Latest'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\PSModules\Carbon.Accounts' -Resolve) `
+                  -Function @('Test-CRunAsElevated') `
+                  -Verbose:$false
+}
+
 BeforeAll {
     Set-StrictMode -Version 'Latest'
 
@@ -74,10 +82,22 @@ Describe 'Invoke-AdvApiQueryServiceObjectSecurity' {
         $Global:Error.Clear()
     }
 
-    $svcNames = Get-Service | Select-Object -ExpandProperty 'Name'
+    # Services known to require admin rights to read security descriptor.
+    $requiresElevatedSvcNames = @('QWAVE', 'pla', 'ose64', 'NetSetupSvc', 'LSM')
+    if (Test-CRunAsElevated)
+    {
+        $requiresElevatedSvcNames = @()
+    }
+    $svcNames =
+        Get-Service -ErrorAction Ignore |
+        Select-Object -ExpandProperty 'Name' |
+        Where-Object { $_ -notin $requiresElevatedSvcNames } |
+        Where-Object { $_ -notlike 'CDPUserSvc*' }
     Context '<_>' -ForEach $svcNames {
         BeforeAll {
-            $script:svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle -ServiceName $_
+            $script:svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle `
+                                                         -ServiceName $_ `
+                                                         -DesiredAccess ReadControl
         }
 
         AfterAll {
@@ -85,6 +105,8 @@ Describe 'Invoke-AdvApiQueryServiceObjectSecurity' {
         }
 
         It 'queries <_> security information' -ForEach ([Enum]::GetValues([SecurityInfos])) {
+            $script:svcHandle | Should -Not -BeNullOrEmpty
+
             if ($_.HasFlag([SecurityInfos]::SystemAcl))
             {
                 $sd = Invoke-AdvApiQueryServiceObjectSecurity -ServiceHandle $script:svcHandle `
@@ -103,7 +125,10 @@ Describe 'Invoke-AdvApiQueryServiceObjectSecurity' {
     }
 
     It 'queries multiple security infos' {
-        $svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle -ServiceName 'W32Time'
+        $svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle `
+                                              -ServiceName 'W32Time' `
+                                              -DesiredAccess ReadControl
+        $script:svcHandle | Should -Not -BeNullOrEmpty
         $infos = [SecurityInfos]::DiscretionaryAcl -bor [SecurityInfos]::Group -bor [SecurityInfos]::Owner
 
         try

@@ -89,7 +89,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
             $info = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle `
                                                      -InfoLevel PreferredNode `
                                                      -ErrorAction SilentlyContinue
-            ThenError -Matches 'failed to determine memory needed to read PreferredNode'
+            ThenError -Matches 'failed to determine memory needed to read service''s PreferredNode'
             $info | Should -BeNullOrEmpty
         }
 
@@ -250,7 +250,7 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
         }
     }
 
-    $svcNames = Get-Service | Select-Object -ExpandProperty 'Name'
+    $svcNames = Get-Service -ErrorAction Ignore | Select-Object -ExpandProperty 'Name'
     It 'queries <_> service' -ForEach $svcNames {
         $svcHandle = Invoke-AdvApiOpenService -SCManagerHandle $script:scmHandle `
                                               -ServiceName $_ `
@@ -258,24 +258,93 @@ Describe 'Invoke-AdvApiQueryServiceConfig2' {
 
         try
         {
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel DelayedAutoStart
+            $config | Should -Not -BeNullOrEmpty
+            $config.DelayedAutoStart | Should -BeOfType ([bool])
+
+            # On my computer, reading the WaaSMedicSvc service's description throws an error, even in the services
+            # UI. On build servers, reading the CDPUserSvc_26dec service's description throws "The resource loader
+            # failed to find MUI file." exception.
+            if ($_ -ne 'WaaSMedicSvc' -and $_ -notlike 'CDPUserSvc*')
             {
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel DelayedAutoStart
-                # On my computer, reading the WaaSMedicSvc service's description throws an error, even in the services
-                # UI. On build servers, reading the CDPUserSvc_26dec service's description throws "The resource loader
-                # failed to find MUI file." exception.
-                if ($_ -ne 'WaaSMedicSvc' -and $_ -notlike 'CDPUserSvc*')
+                $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Description
+                $config | Should -Not -BeNullOrEmpty
+                $config | Get-Member -Name 'Description' | Should -Not -BeNullOrEmpty
+                if ($config.Description)
                 {
-                    Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Description
+                    $config.Description | Should -BeOfType ([String])
                 }
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel FailureActions
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel FailureActionsFlag
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel LaunchProtected
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Preshutdown
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel RequiredPrivileges
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel SidType
-                Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Triggers
-            } | Should -Not -Throw -Because "should be able to query ${_} configuration"
+            }
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel FailureActions
+            $config | Should -Not -BeNullOrEmpty
+            $null -eq $config.Actions | Should -BeFalse
+            ,$config.Actions | Should -BeOfType ([Object[]])
+            foreach ($action in $config.Actions)
+            {
+                $action | Should -Not -BeNullOrEmpty
+                $action.Type | Should -BeOfType ([Enum])
+                $action.Delay | Should -BeOfType ([UInt32])
+            }
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel FailureActionsFlag
+            $config | Should -Not -BeNullOrEmpty
+            $config.FailureActionsOnNonCrashFailures | Should -BeOfType ([bool])
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel LaunchProtected
+            $config | Should -Not -BeNullOrEmpty
+            $config.LaunchProtected | Should -BeOfType ([Enum])
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Preshutdown
+            $config | Should -Not -BeNullOrEmpty
+            $config.PreshutdownTimeout | Should -BeOfType ([UInt32])
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel RequiredPrivileges
+            $config | Should -Not -BeNullOrEmpty
+            $null -eq $config.RequiredPrivileges | Should -BeFalse
+            ,$config.RequiredPrivileges | Should -BeOfType ([String[]])
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel SidType
+            $config | Should -Not -BeNullOrEmpty
+            $config.SidType | Should -BeOfType ([Enum])
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle -InfoLevel Triggers
+            $config | Should -Not -BeNullOrEmpty
+            ,$config.Triggers | Should -BeOfType ([Object[]])
+            $null -eq $config.Triggers | Should -BeFalse
+            foreach ($trigger in $config.Triggers)
+            {
+                $trigger | Should -Not -BeNullOrEmpty
+                $trigger.Type | Should -BeOfType ([Enum])
+                $trigger.Action | Should -BeOfType ([Enum])
+                ,$trigger.DataItems | Should -BeOfType ([Object[]])
+
+                foreach ($datum in $trigger.DataItems)
+                {
+                    $datum | Should -Not -BeNullOrEmpty
+                    $datum.Type | Should -BeOfType ([Enum])
+                    $datum.Data | Should -Not -BeNullOrEmpty
+                    ,$datum.Data | Should -BeOfType ([Object])
+                }
+            }
+
             ThenError -IsEmpty
+
+            $config = Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $svcHandle `
+                                                       -InfoLevel PreferredNode `
+                                                       -ErrorAction SilentlyContinue
+            if (-not $config)
+            {
+                # Failed with "invalid parameter" because NUMA isn't enabled.
+                ThenError -Matches 'service''s PreferredNode configuration.*87.*'
+            }
+            else
+            {
+                ThenError -IsEmpty
+                $config.PreferredNode | Should -BeOfType ([UInt16])
+                $config.PreferredNode | Should -BeGreaterThan 0
+            }
+
         }
         finally
         {

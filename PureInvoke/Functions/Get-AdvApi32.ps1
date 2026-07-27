@@ -1,6 +1,10 @@
 
 function Get-AdvApi32
 {
+    [CmdletBinding()]
+    param(
+    )
+
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState
 
@@ -166,8 +170,7 @@ function Get-AdvApi32
 
 			public uint TagID;
 
-            [MarshalAs(UnmanagedType.LPWStr)]
-			public string Dependencies;
+			public IntPtr Dependencies;
 
 			[MarshalAs(UnmanagedType.LPWStr)]
 			public string ServiceStartName;
@@ -221,7 +224,7 @@ function Get-AdvApi32
 		[StructLayout(LayoutKind.Sequential)]
         public class ServiceConfigPreferredNode
         {
-            public short PreferredNode;
+            public ushort PreferredNode;
             public bool Delete;
         }
 

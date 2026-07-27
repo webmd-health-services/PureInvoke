@@ -3,28 +3,38 @@ function Invoke-AdvApiQueryServiceConfig2
 {
     <#
     .SYNOPSIS
-    Calls the Win32 API `QueryServiceConfig2` to retrieve parts of a service's configuration.
+    Calls the Windows API's `QueryServiceConfig2` function to retrieve parts of a service's configuration.
 
     .DESCRIPTION
-    The `Invoke-AdvApiQueryServiceConfig2` function calls the `QueryServiceConfig2` Win32 API to retrieve parts of a
-    service's configuration. Pass a handle to the service to the `ServiceHandle` parameter (use
-    `Invoke-AdvApiOpenService` to get a handle to a service, passing the `QueryConfig` flag to `DesiredAccess`). Pass
-    the information you want to the `InfoLevel` parameter. Valid information levels and what they return are:
+    The `Invoke-AdvApiQueryServiceConfig2` function calls the `QueryServiceConfig2` Windows API function to retrieve
+    parts of a service's configuration. Pass a handle to the service to the `ServiceHandle` parameter. Pass the
+    information you want to the `InfoLevel` parameter. Valid information levels and what they return are:
 
     * `[DelayedAutoStart](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_delayed_auto_start_info)`
     * `[Description](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_descriptionw)`
     * `[FailureActions](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsw)`
     * `[FailureActionsFlag](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actions_flag)`
     * `[PreferredNode](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_preferred_node_info)`
+      (requires that NUMA is enabled/configured on the system)
     * `[Preshutdown](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_preshutdown_info)`
     * `[RequiredPrivileges](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_required_privileges_infow)`
     * `[SidType](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_sid_info)`
     * `[Triggers](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger)`
     * `[LaunchProtected](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_launch_protected_info)`
 
-    The function converts each unmanaged Win32 structure to a `[pscustomobject]` with property names similar to the
-    native structures. Property names don't have the unmanaged type prefixes (e.g. `Description` instead of
-    `lpDescription`). All unmanaged types are converted to managed types.
+    The function returns a `[pscustomobject]` with property names similar to native structures. Property names don't
+    have the unmanaged type prefixes (e.g. `Description` instead of `lpDescription`). All unmanaged types are converted
+    to managed types.
+
+    Requesting preferred node information requires that NUMA is configured on the system. If NUMA isn't configured, the
+    `QueryServiceConfig2` function will fail with "parameter is incorrect"" error when requesting preferred node
+    information. Use `Invoke-KernelGetNumaHighestNodeNumber` to determine if NUMA is enabled. It returns a non-zero
+    value when NUMA is configured, or 0 if NUMA is not configured.
+
+    Use `Invoke-AdvApiOpenService` to get a handle to the service, passing `QueryConfig` for the desired access.
+
+    .LINK
+    Invoke-KernelGetNumaHighestNodeNumber
 
     .EXAMPLE
     Invoke-AdvApiQueryServiceConfig2 -ServiceHandle $handle -InfoLevel Description
@@ -34,7 +44,8 @@ function Invoke-AdvApiQueryServiceConfig2
     #>
     [CmdletBinding()]
     param(
-        # Handle to the service whose configuration to get. Use `Invoke-AdvApiOpenService` to open the service.
+        # Handle to the service whose configuration to get. Use `Invoke-AdvApiOpenService` to open the service, passing
+        # `QueryConfig` for the desired access.
         [Parameter(Mandatory)]
         [IntPtr] $ServiceHandle,
 
@@ -50,6 +61,9 @@ function Invoke-AdvApiQueryServiceConfig2
         # * `[SidType](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_sid_info)`
         # * `[Triggers](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_trigger)`
         # * `[LaunchProtected](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_launch_protected_info)`
+        #
+        # When requesting a service's preferred node configuration, if NUMA isn't configured, will write a "The
+        # parameter is incorrect." error.
         [Parameter(Mandatory)]
         [PureInvoke_ServiceInfoLevel] $InfoLevel
     )
@@ -85,7 +99,7 @@ function Invoke-AdvApiQueryServiceConfig2
     $lastError = [Marshal]::GetLastWin32Error()
     if (-not $ok -and $lastError -ne [PureInvoke_ErrorCode]::InsufficientBuffer)
     {
-        $msg = "Failed to determine memory needed to read ${InfoLevel} service configuration."
+        $msg = "Failed to determine memory needed to read service's ${InfoLevel} configuration."
         Write-Win32Error -ErrorCode $lastError -Message $msg
         return
     }
@@ -95,7 +109,7 @@ function Invoke-AdvApiQueryServiceConfig2
     $lastError = [Marshal]::GetLastWin32Error()
     if (-not $ok)
     {
-        Write-Win32Error -ErrorCode $lastError -Message "Failed to query service ${InfoLevel} configuration."
+        Write-Win32Error -ErrorCode $lastError -Message "Failed to read service's ${InfoLevel} configuration."
         return
     }
 
@@ -130,15 +144,9 @@ function Invoke-AdvApiQueryServiceConfig2
                 $ptrAction = [IntPtr]::Add($info.Actions, $offset)
                 [Marshal]::PtrToStructure($ptrAction, $action)
 
-                $failureAction = $action.Type
-                if ($script:failureActions.Contains($failureAction))
-                {
-                    $failureAction = [PureInvoke_ServiceFailureAction]$failureAction
-                }
-
                 [void]$actions.Add(
                     [pscustomobject]@{
-                        Type = $failureAction
+                        Type = [PureInvoke_ServiceFailureAction]$action.Type
                         Delay = $action.Delay
                     }
                 )
@@ -177,6 +185,10 @@ function Invoke-AdvApiQueryServiceConfig2
         if ($InfoLevel -eq [PureInvoke_ServiceInfoLevel]::RequiredPrivileges)
         {
             [String[]]$privs = ConvertFrom-MultiString -Handle $info.RequiredPrivileges
+            if ($null -eq $privs)
+            {
+                $privs = [String[]]::New(0)
+            }
 
             return [pscustomobject]@{
                 RequiredPrivileges = $privs
@@ -200,12 +212,7 @@ function Invoke-AdvApiQueryServiceConfig2
                 [IntPtr]$ptrTrigger = [IntPtr]::Add($info.Triggers, ($sizeOfTrigger * $triggerIdx))
                 [Marshal]::PtrToStructure($ptrTrigger, $trigger)
 
-                # There are some undocumented values: 7 and 30.
-                $triggerType = $trigger.Type
-                if ($script:triggerTypes.Contains($triggerType))
-                {
-                    $triggerType = [PureInvoke_ServiceTriggerType]$triggerType
-                }
+                $triggerType = [PureInvoke_ServiceTriggerType]$trigger.Type
 
                 $subtype = [Marshal]::PtrToStructure($trigger.Subtype, ([Type][Guid]))
 

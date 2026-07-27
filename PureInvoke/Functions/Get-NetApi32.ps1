@@ -2,7 +2,8 @@
 function Get-NetApi32
 {
     [CmdletBinding()]
-    param()
+    param(
+    )
 
     Set-StrictMode -Version 'Latest'
     Use-CallerPreference -Cmdlet $PSCmdlet -Session $ExecutionContext.SessionState

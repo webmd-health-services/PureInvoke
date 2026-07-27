@@ -3,11 +3,12 @@ function Invoke-AdvApiQueryServiceConfig
 {
     <#
     .SYNOPSIS
-    Calls the Win32 API `QueryServiceConfig` function to retrieve a service's configuration.
+    Calls the `QueryServiceConfig` Windows API function to retrieve a service's configuration.
 
     .DESCRIPTION
-    The `Invoke-AdvApiQueryServiceConfig` function calls the Win32 API `QueryServiceConfig` function to retrieve a
-    service's configuration. It returns an object with the properties that match the
+    The `Invoke-AdvApiQueryServiceConfig` function calls the `QueryServiceConfig` Windows API function to retrieve a
+    service's configuration. Pass a handle to the service to the `ServiceHandle` parameter. The function returns an
+    `[pscustomobject]` with properties that correspond to the properties on the native
     [QUERY_SERVICE_CONFIG](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-query_service_configw)
     structure:
 
@@ -22,9 +23,8 @@ function Invoke-AdvApiQueryServiceConfig
     * DisplayName
 
     Use the `Invoke-AdvApiOpenSCManager` function to open the Service Control Manager, then use
-    `Invoke-AdvApiOpenService` to get a handle to the service whose configuration you want to get, passing the
-    `QueryConfig` flag to `DesiredAccess`. Pass the service handle to `Invoke-AdvApiQueryServiceConfig` to get the
-    service's configuration.
+    `Invoke-AdvApiOpenService` to get a handle to the service whose configuration you want to get, passing `QueryConfig`
+    as the desired access.
 
     .EXAMPLE
     Invoke-AdvApiQueryServiceConfig -ServiceHandle $handle
@@ -34,7 +34,8 @@ function Invoke-AdvApiQueryServiceConfig
     [CmdletBinding()]
     param(
         # The handle to the service whose configuration to get. Use the `Invoke-AdvApiOpenSCManager` function to open
-        # the Service Control Manager, then use `Invoke-AdvApiOpenService` to get a handle to the service.
+        # the Service Control Manager, then use `Invoke-AdvApiOpenService` with `QueryConfig` as the desired access to
+        # get a handle to the service.
         [Parameter(Mandatory)]
         [IntPtr] $ServiceHandle
     )
@@ -66,17 +67,28 @@ function Invoke-AdvApiQueryServiceConfig
 
     $config = $advApi | New-PInvokeStruct -Name 'ServiceConfig'
     [Marshal]::PtrToStructure($ptrInfo, $config)
-    [Marshal]::FreeHGlobal($ptrInfo)
 
-    return [pscustomobject] @{
-        ServiceType = [Enum]::ToObject([ServiceProcess.ServiceType], $config.ServiceType)
-        StartType = [Enum]::ToObject([ServiceProcess.ServiceStartMode], $config.StartType)
-        ErrorControl = [PureInvoke_ServiceErrorControl]$config.ErrorControl
-        BinaryPathName = $config.BinaryPathName
-        LoadOrderGroup = $config.LoadOrderGroup
-        TagID = $config.TagId
-        Dependencies = $config.Dependencies
-        ServiceStartName = $config.ServiceStartName
-        DisplayName = $config.DisplayName
+    try
+    {
+        [String[]]$dependencies = ConvertFrom-MultiString -Handle $config.Dependencies
+        if ($null -eq $dependencies)
+        {
+            $dependencies = [String[]]::New(0)
+        }
+        return [pscustomobject] @{
+            ServiceType = [Enum]::ToObject([ServiceProcess.ServiceType], $config.ServiceType)
+            StartType = [Enum]::ToObject([ServiceProcess.ServiceStartMode], $config.StartType)
+            ErrorControl = [PureInvoke_ServiceErrorControl]$config.ErrorControl
+            BinaryPathName = $config.BinaryPathName
+            LoadOrderGroup = $config.LoadOrderGroup
+            TagID = $config.TagId
+            Dependencies = $dependencies
+            ServiceStartName = $config.ServiceStartName
+            DisplayName = $config.DisplayName
+        }
+    }
+    finally
+    {
+        [Marshal]::FreeHGlobal($ptrInfo)
     }
 }

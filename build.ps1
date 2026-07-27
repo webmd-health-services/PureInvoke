@@ -170,6 +170,7 @@ if( -not (Test-Path -Path $whiskeyModuleRoot -PathType Container) )
     Remove-Item -Path $zipFilePath
 }
 
+$ErrorActionPreference = 'Continue'
 & {
     $VerbosePreference = 'SilentlyContinue'
     Import-Module -Name $whiskeyModuleRoot -Force
