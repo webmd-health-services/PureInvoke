@@ -43,13 +43,13 @@ function Invoke-KernelGetNumaHighestNodeNumber
 
     $kernel32 = Get-Kernel32
 
-    [Uint32] $result = 0
-    $result = $kernel32::GetNumaHighestNodeNumber([ref]$result)
+    [Uint32] $nodeNumber = 0
+    $result = $kernel32::GetNumaHighestNodeNumber([ref]$nodeNumber)
     $lastError = [Marshal]::GetLastWin32Error()
     if (-not $result)
     {
         Write-Win32Error -ErrorCode $lastError -Message "Failed to get NUMA highest node number."
         return
     }
-    return $result
+    return $nodeNumber
 }
