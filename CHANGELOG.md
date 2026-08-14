@@ -1,6 +1,12 @@
 
 # PureInvoke PowerShell Module Changelog
 
+## 2.0.1
+
+### Fixed
+
+Writes debug messages as verbose messages.
+
 ## 2.0.0
 
 ### Upgrade Instructions
