@@ -55,7 +55,7 @@ function Add-PInvokeType
             {
                 New-Item -Path $script:tmpPath -ItemType Directory -Force | Out-Null
             }
-            Write-Debug "Setting ${script:tmpPathEnvVarName} to ""${script:tmpPath}"" (from ""${originalTmpPath}"")."
+            Write-Verbose "Setting ${script:tmpPathEnvVarName} to ""${script:tmpPath}"" (from ""${originalTmpPath}"")."
             [Environment]::SetEnvironmentVariable($script:tmpPathEnvVarName, $script:tmpPath, [EnvironmentVariableTarget]::Process)
         }
     }
@@ -66,7 +66,7 @@ function Add-PInvokeType
     {
         try
         {
-            Write-Verbose -Message @"
+            Write-Debug -Message @"
 namespace ${namespace};
 
 class ${typeName}
@@ -99,16 +99,15 @@ ${Definition}
                 throw
             }
 
-            $msg = "Failed to compile ${DllName} ${fullTypeName} class (retrying in ${waitMsBetweenFailures}ms): ${_}."
+            $msg = "PureInvoke PowerShell module's Add-PInvokeType function failed to compile ${DllName} " +
+                   "${fullTypeName} class because ${_}."
             if ($waitMsBetweenFailures -gt (10 * 1000))
             {
-                $msg = "PureInvoke PowerShell module's Add-PInvokeType function " +
-                       "$($msg[0].ToLowerInvariant())$($msg.Substring(1))"
                 Write-Warning -Message $msg -WarningAction $WarningPreference
             }
             else
             {
-                Write-Verbose -Message $msg
+                Write-Verbose -Message "${msg} Retrying in ${waitMsBetweenFailures}ms."
             }
             Start-Sleep -Milliseconds $waitMsBetweenFailures
             $waitMsBetweenFailures *= 2
@@ -117,7 +116,7 @@ ${Definition}
         {
             if ($script:tmpPath)
             {
-                Write-Debug "Setting ${script:tmpPathEnvVarName} back to ""${originalTmpPath}"" (from ""${script:tmpPath})""."
+                Write-Verbose "Setting ${script:tmpPathEnvVarName} back to ""${originalTmpPath}"" (from ""${script:tmpPath})""."
                 [Environment]::SetEnvironmentVariable($script:tmpPathEnvVarName, $originalTmpPath, [EnvironmentVariableTarget]::Process)
             }
         }

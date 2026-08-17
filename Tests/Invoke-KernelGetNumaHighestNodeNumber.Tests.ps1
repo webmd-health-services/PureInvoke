@@ -13,5 +13,6 @@ Describe 'Invoke-KernelGetNumaHighestNodeNumber' {
         $result = Invoke-KernelGetNumaHighestNodeNumber
         $result | Should -Not -BeNullOrEmpty
         $result | Should -BeOfType ([UInt32])
+        $result | Should -Be 0
     }
 }
